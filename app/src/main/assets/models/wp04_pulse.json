@@ -1,0 +1,17 @@
+{
+  "id": "wp04_pulse",
+  "name": "脉冲器",
+  "kind": "tool",
+  "dimensionsUnit": "meter",
+  "sideFiles": [
+    "wp04_pulse_right.glb",
+    "wp04_pulse_left.glb"
+  ],
+  "clips": [
+    "equip",
+    "fire"
+  ],
+  "mirroredLeftPending": false,
+  "triangles": 9928,
+  "leftMethod": "Exact left/right mirror under a new glTF root; skeleton and clips preserved"
+}

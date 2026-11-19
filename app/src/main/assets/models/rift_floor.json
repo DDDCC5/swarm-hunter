@@ -1,0 +1,13 @@
+{
+  "id": "rift_floor",
+  "name": "地面裂口",
+  "kind": "rift",
+  "clips": [
+    "open",
+    "crack",
+    "close"
+  ],
+  "unit": "meter",
+  "triangles": 1232,
+  "runtimeAudioEmbedded": false
+}

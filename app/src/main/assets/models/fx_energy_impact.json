@@ -1,0 +1,11 @@
+{
+  "id": "fx_energy_impact",
+  "name": "energy命中/消散粒子",
+  "kind": "fx",
+  "clips": [
+    "burst"
+  ],
+  "unit": "meter",
+  "triangles": 576,
+  "runtimeAudioEmbedded": false
+}

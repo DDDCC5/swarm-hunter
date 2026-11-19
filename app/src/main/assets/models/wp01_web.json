@@ -1,0 +1,17 @@
+{
+  "id": "wp01_web",
+  "name": "蛛丝发射器",
+  "kind": "tool",
+  "dimensionsUnit": "meter",
+  "sideFiles": [
+    "wp01_web_right.glb",
+    "wp01_web_left.glb"
+  ],
+  "clips": [
+    "equip",
+    "fire"
+  ],
+  "mirroredLeftPending": false,
+  "triangles": 16832,
+  "leftMethod": "Exact left/right mirror under a new glTF root; skeleton and clips preserved"
+}

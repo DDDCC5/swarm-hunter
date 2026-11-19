@@ -1,0 +1,432 @@
+{
+  "assets": [
+    {
+      "id": "safety_panel",
+      "source": "ui/source/safety_panel.svg",
+      "file": "ui/safety_panel.png",
+      "width": 960,
+      "height": 640,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "gesture_panel",
+      "source": "ui/source/gesture_panel.svg",
+      "file": "ui/gesture_panel.png",
+      "width": 1200,
+      "height": 760,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "tool_selection_panel",
+      "source": "ui/source/tool_selection_panel.svg",
+      "file": "ui/tool_selection_panel.png",
+      "width": 1600,
+      "height": 680,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "pickup_panel",
+      "source": "ui/source/pickup_panel.svg",
+      "file": "ui/pickup_panel.png",
+      "width": 1200,
+      "height": 760,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "results_panel",
+      "source": "ui/source/results_panel.svg",
+      "file": "ui/results_panel.png",
+      "width": 960,
+      "height": 760,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "controller_notice_panel",
+      "source": "ui/source/controller_notice_panel.svg",
+      "file": "ui/controller_notice_panel.png",
+      "width": 960,
+      "height": 480,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "tracking_notice_panel",
+      "source": "ui/source/tracking_notice_panel.svg",
+      "file": "ui/tracking_notice_panel.png",
+      "width": 960,
+      "height": 480,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "hud_life_panel",
+      "source": "ui/source/hud_life_panel.svg",
+      "file": "ui/hud_life_panel.png",
+      "width": 480,
+      "height": 112,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "hud_stats_panel",
+      "source": "ui/source/hud_stats_panel.svg",
+      "file": "ui/hud_stats_panel.png",
+      "width": 640,
+      "height": 112,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "button_primary_normal",
+      "source": "ui/source/button_primary_normal.svg",
+      "file": "ui/button_primary_normal.png",
+      "width": 360,
+      "height": 96,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "button_primary_hover",
+      "source": "ui/source/button_primary_hover.svg",
+      "file": "ui/button_primary_hover.png",
+      "width": 360,
+      "height": 96,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "button_primary_pressed",
+      "source": "ui/source/button_primary_pressed.svg",
+      "file": "ui/button_primary_pressed.png",
+      "width": 360,
+      "height": 96,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "button_primary_disabled",
+      "source": "ui/source/button_primary_disabled.svg",
+      "file": "ui/button_primary_disabled.png",
+      "width": 360,
+      "height": 96,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "button_secondary_normal",
+      "source": "ui/source/button_secondary_normal.svg",
+      "file": "ui/button_secondary_normal.png",
+      "width": 360,
+      "height": 96,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "button_secondary_hover",
+      "source": "ui/source/button_secondary_hover.svg",
+      "file": "ui/button_secondary_hover.png",
+      "width": 360,
+      "height": 96,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "button_secondary_pressed",
+      "source": "ui/source/button_secondary_pressed.svg",
+      "file": "ui/button_secondary_pressed.png",
+      "width": 360,
+      "height": 96,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "button_secondary_disabled",
+      "source": "ui/source/button_secondary_disabled.svg",
+      "file": "ui/button_secondary_disabled.png",
+      "width": 360,
+      "height": 96,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "life_full",
+      "source": "ui/source/life_full.svg",
+      "file": "ui/life_full.png",
+      "width": 96,
+      "height": 96,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "life_empty",
+      "source": "ui/source/life_empty.svg",
+      "file": "ui/life_empty.png",
+      "width": 96,
+      "height": 96,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "life_damage",
+      "source": "ui/source/life_damage.svg",
+      "file": "ui/life_damage.png",
+      "width": 96,
+      "height": 96,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "capture_ring_idle",
+      "source": "ui/source/capture_ring_idle.svg",
+      "file": "ui/capture_ring_idle.png",
+      "width": 256,
+      "height": 256,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "capture_ring_tracking",
+      "source": "ui/source/capture_ring_tracking.svg",
+      "file": "ui/capture_ring_tracking.png",
+      "width": 256,
+      "height": 256,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "capture_ring_matched",
+      "source": "ui/source/capture_ring_matched.svg",
+      "file": "ui/capture_ring_matched.png",
+      "width": 256,
+      "height": 256,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "capture_ring_error",
+      "source": "ui/source/capture_ring_error.svg",
+      "file": "ui/capture_ring_error.png",
+      "width": 256,
+      "height": 256,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "reticle_ready",
+      "source": "ui/source/reticle_ready.svg",
+      "file": "ui/reticle_ready.png",
+      "width": 128,
+      "height": 128,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "reticle_hit",
+      "source": "ui/source/reticle_hit.svg",
+      "file": "ui/reticle_hit.png",
+      "width": 128,
+      "height": 128,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "pose_capture_waiting",
+      "source": "ui/source/pose_capture_waiting.svg",
+      "file": "ui/pose_capture_waiting.png",
+      "width": 240,
+      "height": 300,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "pose_capture_capturing",
+      "source": "ui/source/pose_capture_capturing.svg",
+      "file": "ui/pose_capture_capturing.png",
+      "width": 240,
+      "height": 300,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "pose_capture_matched",
+      "source": "ui/source/pose_capture_matched.svg",
+      "file": "ui/pose_capture_matched.png",
+      "width": 240,
+      "height": 300,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "pose_capture_error",
+      "source": "ui/source/pose_capture_error.svg",
+      "file": "ui/pose_capture_error.png",
+      "width": 240,
+      "height": 300,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "registration_progress_track",
+      "source": "ui/source/registration_progress_track.svg",
+      "file": "ui/registration_progress_track.png",
+      "width": 640,
+      "height": 24,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "registration_progress_fill",
+      "source": "ui/source/registration_progress_fill.svg",
+      "file": "ui/registration_progress_fill.png",
+      "width": 640,
+      "height": 24,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "adaptive_foreground",
+      "source": "ui/source/adaptive_foreground.svg",
+      "file": "ui/adaptive_foreground.png",
+      "width": 1024,
+      "height": 1024,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "adaptive_background",
+      "source": "ui/source/adaptive_background.svg",
+      "file": "ui/adaptive_background.png",
+      "width": 1024,
+      "height": 1024,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "app_icon_1024",
+      "source": "ui/source/app_icon.svg",
+      "file": "ui/app_icon_1024.png",
+      "width": 1024,
+      "height": 1024,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "app_icon_512",
+      "source": "ui/source/app_icon.svg",
+      "file": "ui/app_icon_512.png",
+      "width": 512,
+      "height": 512,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "app_icon_192",
+      "source": "ui/source/app_icon.svg",
+      "file": "ui/app_icon_192.png",
+      "width": 192,
+      "height": 192,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "app_icon_144",
+      "source": "ui/source/app_icon.svg",
+      "file": "ui/app_icon_144.png",
+      "width": 144,
+      "height": 144,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "app_icon_96",
+      "source": "ui/source/app_icon.svg",
+      "file": "ui/app_icon_96.png",
+      "width": 96,
+      "height": 96,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "app_icon_72",
+      "source": "ui/source/app_icon.svg",
+      "file": "ui/app_icon_72.png",
+      "width": 72,
+      "height": 72,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "app_icon_48",
+      "source": "ui/source/app_icon.svg",
+      "file": "ui/app_icon_48.png",
+      "width": 48,
+      "height": 48,
+      "status": "produced",
+      "approval": "pending"
+    },
+    {
+      "id": "thumb_wp01_web",
+      "source": "sources/wp01_web.blend",
+      "file": "ui/thumb_wp01_web.png",
+      "width": 512,
+      "height": 512,
+      "status": "produced",
+      "approval": "pending",
+      "renderTool": "tools/render_ui_thumbs.py"
+    },
+    {
+      "id": "thumb_wp02_laser",
+      "source": "sources/wp02_laser.blend",
+      "file": "ui/thumb_wp02_laser.png",
+      "width": 512,
+      "height": 512,
+      "status": "produced",
+      "approval": "pending",
+      "renderTool": "tools/render_ui_thumbs.py"
+    },
+    {
+      "id": "thumb_wp03_energy",
+      "source": "sources/wp03_energy.blend",
+      "file": "ui/thumb_wp03_energy.png",
+      "width": 512,
+      "height": 512,
+      "status": "produced",
+      "approval": "pending",
+      "renderTool": "tools/render_ui_thumbs.py"
+    },
+    {
+      "id": "thumb_wp04_pulse",
+      "source": "sources/wp04_pulse.blend",
+      "file": "ui/thumb_wp04_pulse.png",
+      "width": 512,
+      "height": 512,
+      "status": "produced",
+      "approval": "pending",
+      "renderTool": "tools/render_ui_thumbs.py"
+    }
+  ],
+  "nineSliceInsets": {
+    "panels": [
+      28,
+      28,
+      28,
+      28
+    ],
+    "buttons": [
+      16,
+      16,
+      16,
+      16
+    ]
+  },
+  "locales": [
+    "zh-CN",
+    "en"
+  ],
+  "applicationNameIsSystemLocalizedNotBaked": true
+}

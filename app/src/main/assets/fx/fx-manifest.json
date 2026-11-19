@@ -1,0 +1,150 @@
+{
+  "assets": [
+    {
+      "id": "silk_flash",
+      "atlas": "fx/silk_flash_atlas.png",
+      "motionPreview": "fx/silk_flash_motion.webp",
+      "frames": 32,
+      "columns": 8,
+      "rows": 4,
+      "frameSize": [
+        256,
+        256
+      ],
+      "fps": 24,
+      "alpha": "straight",
+      "blend": "additive",
+      "status": "produced",
+      "approval": "pending",
+      "runtimeNote": "Flipbook resource; material shader and timing are integrated only in phase three."
+    },
+    {
+      "id": "laser_glow",
+      "atlas": "fx/laser_glow_atlas.png",
+      "motionPreview": "fx/laser_glow_motion.webp",
+      "frames": 32,
+      "columns": 8,
+      "rows": 4,
+      "frameSize": [
+        256,
+        256
+      ],
+      "fps": 24,
+      "alpha": "straight",
+      "blend": "additive",
+      "status": "produced",
+      "approval": "pending",
+      "runtimeNote": "Flipbook resource; material shader and timing are integrated only in phase three."
+    },
+    {
+      "id": "energy_core",
+      "atlas": "fx/energy_core_atlas.png",
+      "motionPreview": "fx/energy_core_motion.webp",
+      "frames": 32,
+      "columns": 8,
+      "rows": 4,
+      "frameSize": [
+        256,
+        256
+      ],
+      "fps": 24,
+      "alpha": "straight",
+      "blend": "additive",
+      "status": "produced",
+      "approval": "pending",
+      "runtimeNote": "Flipbook resource; material shader and timing are integrated only in phase three."
+    },
+    {
+      "id": "pulse_wave",
+      "atlas": "fx/pulse_wave_atlas.png",
+      "motionPreview": "fx/pulse_wave_motion.webp",
+      "frames": 32,
+      "columns": 8,
+      "rows": 4,
+      "frameSize": [
+        256,
+        256
+      ],
+      "fps": 24,
+      "alpha": "straight",
+      "blend": "additive",
+      "status": "produced",
+      "approval": "pending",
+      "runtimeNote": "Flipbook resource; material shader and timing are integrated only in phase three."
+    },
+    {
+      "id": "impact_web",
+      "atlas": "fx/impact_web_atlas.png",
+      "motionPreview": "fx/impact_web_motion.webp",
+      "frames": 32,
+      "columns": 8,
+      "rows": 4,
+      "frameSize": [
+        256,
+        256
+      ],
+      "fps": 24,
+      "alpha": "straight",
+      "blend": "alpha",
+      "status": "produced",
+      "approval": "pending",
+      "runtimeNote": "Flipbook resource; material shader and timing are integrated only in phase three."
+    },
+    {
+      "id": "impact_spark",
+      "atlas": "fx/impact_spark_atlas.png",
+      "motionPreview": "fx/impact_spark_motion.webp",
+      "frames": 32,
+      "columns": 8,
+      "rows": 4,
+      "frameSize": [
+        256,
+        256
+      ],
+      "fps": 24,
+      "alpha": "straight",
+      "blend": "additive",
+      "status": "produced",
+      "approval": "pending",
+      "runtimeNote": "Flipbook resource; material shader and timing are integrated only in phase three."
+    },
+    {
+      "id": "monster_dissolve",
+      "atlas": "fx/monster_dissolve_atlas.png",
+      "motionPreview": "fx/monster_dissolve_motion.webp",
+      "frames": 32,
+      "columns": 8,
+      "rows": 4,
+      "frameSize": [
+        256,
+        256
+      ],
+      "fps": 24,
+      "alpha": "straight",
+      "blend": "alpha",
+      "status": "produced",
+      "approval": "pending",
+      "runtimeNote": "Flipbook resource; material shader and timing are integrated only in phase three."
+    },
+    {
+      "id": "rift_dust",
+      "atlas": "fx/rift_dust_atlas.png",
+      "motionPreview": "fx/rift_dust_motion.webp",
+      "frames": 32,
+      "columns": 8,
+      "rows": 4,
+      "frameSize": [
+        256,
+        256
+      ],
+      "fps": 24,
+      "alpha": "straight",
+      "blend": "alpha",
+      "status": "produced",
+      "approval": "pending",
+      "runtimeNote": "Flipbook resource; material shader and timing are integrated only in phase three."
+    }
+  ],
+  "distortionFlow": "fx/pulse_flow_rg.png",
+  "actualPassthroughRefractionVerified": false
+}

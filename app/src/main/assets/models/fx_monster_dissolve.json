@@ -1,0 +1,11 @@
+{
+  "id": "fx_monster_dissolve",
+  "name": "dissolve命中/消散粒子",
+  "kind": "fx",
+  "clips": [
+    "dissolve"
+  ],
+  "unit": "meter",
+  "triangles": 192,
+  "runtimeAudioEmbedded": false
+}

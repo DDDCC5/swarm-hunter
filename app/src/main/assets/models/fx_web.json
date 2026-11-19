@@ -1,0 +1,11 @@
+{
+  "id": "fx_web",
+  "name": "web发射特效",
+  "kind": "fx",
+  "clips": [
+    "flight"
+  ],
+  "unit": "meter",
+  "triangles": 5568,
+  "runtimeAudioEmbedded": false
+}

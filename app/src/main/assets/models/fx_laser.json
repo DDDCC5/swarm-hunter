@@ -1,0 +1,11 @@
+{
+  "id": "fx_laser",
+  "name": "laser发射特效",
+  "kind": "fx",
+  "clips": [
+    "flight"
+  ],
+  "unit": "meter",
+  "triangles": 104,
+  "runtimeAudioEmbedded": false
+}

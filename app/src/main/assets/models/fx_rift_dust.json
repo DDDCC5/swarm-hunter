@@ -1,0 +1,11 @@
+{
+  "id": "fx_rift_dust",
+  "name": "dust命中/消散粒子",
+  "kind": "fx",
+  "clips": [
+    "burst"
+  ],
+  "unit": "meter",
+  "triangles": 144,
+  "runtimeAudioEmbedded": false
+}

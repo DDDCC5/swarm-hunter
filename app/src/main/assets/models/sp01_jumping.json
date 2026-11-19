@@ -1,0 +1,68 @@
+{
+  "id": "sp01_jumping",
+  "name": "炭黑跳蛛",
+  "kind": "spider",
+  "spanMeters": 0.12,
+  "legCount": 8,
+  "bones": 25,
+  "clips": [
+    {
+      "name": "idle",
+      "frames": [
+        1.0,
+        48.0
+      ],
+      "fps": 24
+    },
+    {
+      "name": "crawl",
+      "frames": [
+        1.0,
+        48.0
+      ],
+      "fps": 24
+    },
+    {
+      "name": "emerge",
+      "frames": [
+        1.0,
+        72.0
+      ],
+      "fps": 24
+    },
+    {
+      "name": "emerge_floor",
+      "frames": [
+        1.0,
+        72.0
+      ],
+      "fps": 24
+    },
+    {
+      "name": "attack",
+      "frames": [
+        1.0,
+        36.0
+      ],
+      "fps": 24
+    },
+    {
+      "name": "hit",
+      "frames": [
+        1.0,
+        18.0
+      ],
+      "fps": 24
+    },
+    {
+      "name": "fall",
+      "frames": [
+        1.0,
+        36.0
+      ],
+      "fps": 24
+    }
+  ],
+  "meshes": 1,
+  "triangles": 17328
+}

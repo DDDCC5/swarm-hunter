@@ -1,0 +1,17 @@
+{
+  "id": "wp03_energy",
+  "name": "能量弹",
+  "kind": "tool",
+  "dimensionsUnit": "meter",
+  "sideFiles": [
+    "wp03_energy_right.glb",
+    "wp03_energy_left.glb"
+  ],
+  "clips": [
+    "equip",
+    "fire"
+  ],
+  "mirroredLeftPending": false,
+  "triangles": 5828,
+  "leftMethod": "Exact left/right mirror under a new glTF root; skeleton and clips preserved"
+}

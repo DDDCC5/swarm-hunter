@@ -1,0 +1,17 @@
+{
+  "id": "wp02_laser",
+  "name": "激光束",
+  "kind": "tool",
+  "dimensionsUnit": "meter",
+  "sideFiles": [
+    "wp02_laser_right.glb",
+    "wp02_laser_left.glb"
+  ],
+  "clips": [
+    "equip",
+    "fire"
+  ],
+  "mirroredLeftPending": false,
+  "triangles": 10296,
+  "leftMethod": "Exact left/right mirror under a new glTF root; skeleton and clips preserved"
+}

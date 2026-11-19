@@ -1,0 +1,11 @@
+{
+  "id": "fx_energy",
+  "name": "energy发射特效",
+  "kind": "fx",
+  "clips": [
+    "flight"
+  ],
+  "unit": "meter",
+  "triangles": 3728,
+  "runtimeAudioEmbedded": false
+}
