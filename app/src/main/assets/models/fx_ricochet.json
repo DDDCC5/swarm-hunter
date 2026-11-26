@@ -1,0 +1,21 @@
+{
+  "id": "fx_ricochet",
+  "name": "墙面反弹火花",
+  "kind": "effect",
+  "spanMeters": 0.24,
+  "triangles": 448,
+  "bones": 29,
+  "clips": [
+    {
+      "name": "burst",
+      "frames": [
+        0.0,
+        18.0
+      ],
+      "fps": 30
+    }
+  ],
+  "worldUp": "+Y",
+  "worldForward": "-Z",
+  "surfaceNormalAxis": "+Y"
+}

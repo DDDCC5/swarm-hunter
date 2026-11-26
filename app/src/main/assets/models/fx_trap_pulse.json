@@ -1,0 +1,21 @@
+{
+  "id": "fx_trap_pulse",
+  "name": "机关球形脉冲",
+  "kind": "effect",
+  "spanMeters": 1.8,
+  "triangles": 4032,
+  "bones": 73,
+  "clips": [
+    {
+      "name": "burst",
+      "frames": [
+        0.0,
+        24.0
+      ],
+      "fps": 30
+    }
+  ],
+  "worldUp": "+Y",
+  "worldForward": "-Z",
+  "surfaceNormalAxis": "+Y"
+}

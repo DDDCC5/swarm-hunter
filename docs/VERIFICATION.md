@@ -1,22 +1,20 @@
-# Verification · 1.0.12
+# Verification - 1.1.0
 
-This is a development preview, not a claim that every original performance or visual requirement has completed acceptance.
+This debug candidate is not a claim of completed physical-room gameplay or performance acceptance.
 
 | Area | Evidence |
 | --- | --- |
-| Local core tests | 37 passed, 0 failures, 0 errors; excludes the template arithmetic test |
-| Build | `testDebugUnitTest assembleDebug` passed |
-| Packaged assets | 28 GLB and 198 WAV; localized name and custom icon checked |
-| Launcher icon | Full-square PNG, all pixels opaque; RGBA matches the packaged resource |
-| Real device | 1.0.12 code13 installed and started |
-| Prior real-device combat | Laser: 3 kills; web: 2 kills; HIT and GAME_OVER events observed |
-| Audio lifetime | Repeated playback and emitter destruction check passed |
-| Native projectile motion | About 0.56–0.58m in 0.3s at a requested 2m/s |
-| Native collision | Regular and reparented portal collider: 1.85m measured hit; 10m/s swept query passed |
-| Surface orientation | Floor, wall X and wall Z orientation passed before/after portal emergence |
+| Unit tests | 55 passed, 0 failures, 0 errors (includes template arithmetic test) |
+| Build | testDebugUnitTest assembleDebug passed |
+| Experimental API consistency | Source/manifest checker passed |
+| Packaged assets | 32 GLB, 180 SFX WAV, 36 bilingual voice WAV; 12 upgraded GLB hashes match approved media |
+| Launcher icon | Existing full-square custom icon retained and packaged |
+| Runtime startup | Candidate installed/launched on hardware and compatible 6.2.1 emulator |
+| Imported animations | Native check of 9 model clip sets, duration and playback speed passed |
+| Native probes | Audio reuse, portal/surface orientation, projectile movement and swept collision passed |
 
-Tests cover gesture capture/release and reset, repeated custom-pose registration, tool pickup and visibility, attachment noise/recovery, upright panel heading, wall-to-floor transition and surface projection. Debug-only native checks do not simulate player input or award game points.
+New regression coverage includes complete attack recovery/contact timing, stride mapping, nearest surface/enemy collision, wall-only bounded ricochets, short-beam endpoints, release-gated/limited/non-overlapping traps, full-segment wall occlusion, stale anchor rejection and temporary tracking grace. Debug probes do not simulate player input or award points.
 
-Still pending: measured end-to-end response latency and perceived spatial-audio angular precision, sustained performance, controller activation behavior across firmware, energy/pulse acceptance, and visual review of the latest head-following UI, re-registration navigation, launcher mask and wall emergence. An earlier laser/web hit does not prove every weapon or revised visual passes.
+Pending human acceptance: PBR/alpha appearance, foot contact and attack transitions, physical ricochets, tabletop/wall placement and trap triggering, tracking comfort, voice quality, sustained frame rate and end-to-end gameplay. Measured firing latency and perceived spatial-audio angular accuracy remain unverified. Earlier 1.0.12 laser/web combat results do not establish acceptance of these revised features.
 
-Raw device logs, serial numbers, local filesystem paths and headset passthrough captures are intentionally not included in the public repository. The media shown in the README are offline asset previews.
+No raw device logs, serial numbers, local filesystem paths, headset passthrough captures, internal execution ledgers or submission materials are included in the public repository.

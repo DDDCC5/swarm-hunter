@@ -10,6 +10,8 @@ import com.example.swarmhunter.platform.LaunchActivity
 import com.pico.spatial.core.container.SpatialViewContent
 import com.pico.spatial.core.ecs.*
 import com.pico.spatial.core.ecs.audio.*
+import com.pico.spatial.core.ecs.animation.*
+import org.json.JSONObject
 import com.pico.spatial.core.ecs.resource.*
 import com.pico.spatial.core.ecs.simulation.*
 import com.pico.spatial.core.math.*
@@ -29,7 +31,7 @@ private fun Q4.quat()=Quat(x,y,z,w)
 private fun Entity.safeDestroy(){if(valid)destroy()}
 private val Entity.t get()=components[TransformComponent::class.java]!!
 object SessionConsent {var accepted=false}
-data class HuntSnapshot(val phase:HuntPhase=HuntPhase.LOGO,val lives:Int=3,val kills:Int=0,val seconds:Int=0,val grade:String="C",val progress:Float=0f,val selected:Int=0,val equippedLeft:Boolean=false,val equippedRight:Boolean=false,val controller:Boolean=false,val tracking:Boolean=false,val loading:Boolean=true,val planes:Int=0,val error:String?=null,val hurt:Boolean=false,val handPermission:Boolean=false,val registrationAdjusting:Boolean=false,val armedHands:Int=0)
+data class HuntSnapshot(val phase:HuntPhase=HuntPhase.LOGO,val lives:Int=3,val kills:Int=0,val seconds:Int=0,val grade:String="C",val progress:Float=0f,val selected:Int=0,val equippedLeft:Boolean=false,val equippedRight:Boolean=false,val controller:Boolean=false,val tracking:Boolean=false,val loading:Boolean=true,val planes:Int=0,val error:String?=null,val hurt:Boolean=false,val handPermission:Boolean=false,val registrationAdjusting:Boolean=false,val armedHands:Int=0,val trapsPlaced:Int=0,val placementValid:Boolean=false,val placementHand:Int=1)
 
 class HuntRuntime(private val context:Context,private val scope:CoroutineScope) {
     val engine=HuntEngine();val gesture=GestureMemory();private val combatTracking=CombatTrackingGate()
@@ -49,6 +51,24 @@ class HuntRuntime(private val context:Context,private val scope:CoroutineScope) 
     private val tools=arrayOfNulls<Entity>(2);private val toolMounts=Array(2){Entity()};private val equipped=booleanArrayOf(false,false)
     private val threats=mutableMapOf<Int,EnemyVisual>();private val projectiles=mutableListOf<Projectile>();private val temporary=mutableListOf<Pair<Entity,Float>>()
     private val planes=mutableMapOf<java.util.UUID,PlaneAnchor>()
+    private val room=RoomSurfaceRegistry()
+    private val roomAdapter=RoomSurfaceAdapter(root,room)
+    private val traps=TrapController()
+    private val trapVisuals=mutableMapOf<Int,Entity>()
+    private var trapGhost:Entity?=null
+    private var placementCandidate:SurfaceHit?=null
+    private val animationPlayers=mutableMapOf<Entity,List<AnimationPlaybackController>>()
+    private val retiredPlayers=mutableListOf<Pair<AnimationPlaybackController,Float>>()
+    private val animationNames=mutableMapOf<Entity,String>()
+    private val retiredAnimations=mutableListOf<Pair<AnimationResource,Float>>()
+    private val strides=mutableMapOf<String,Float>()
+    private var disposed=false
+    private var planeWasRunning=false
+    private val roomTracking=RoomTrackingGrace()
+    private val roomSnapshots=RoomSnapshotGate()
+    private var trackingExpired=false
+    private var rangeGhost:Entity?=null
+    private var surfaceCheckStarted=false
     private var scene:Scene?=null;private var now=0f;private var publish=0f;private var nextSpawn=3f;private var logoTime=0f;private var selected=0;private var loading=true;private var error:String?=null
     private var head=V3(0f,1.5f,0f);private var forward=V3(0f,0f,-1f);private var headRotation=Quat.identity();private var lastPhase=HuntPhase.LOGO
     private var lastHandPresence=-1
@@ -71,15 +91,16 @@ class HuntRuntime(private val context:Context,private val scope:CoroutineScope) 
         val floorY:Float,val depth:Float,val holeScale:Float,val attack:AttackCycle=AttackCycle(),
         var emerged:Boolean=false,var moving:Boolean=false,var closedAt:Float=0f,var dying:Float=0f,var cue:Float=0f
     )
-    private data class Projectile(val entity:Entity,val visual:Entity,val core:Entity?,val tool:Int,val direction:V3,val launch:V3,var last:V3,var age:Float=0f)
+    private data class Projectile(val entity:Entity,val visual:Entity,val core:Entity?,val tool:Int,val motion:RicochetState,val launch:V3,var last:V3,var age:Float=0f){val direction get()=motion.direction}
     fun receiveHands(data:HandTrackingData){handData=data;lastHandAt=SystemClock.elapsedRealtime();val presence=(if(data.left!=null)1 else 0)+(if(data.right!=null)2 else 0);if(presence!=lastHandPresence){lastHandPresence=presence;trace("HAND_FRAME left=${data.left!=null} right=${data.right!=null}")}}
     fun beginProviders(){if(providersStarted)return;providersStarted=true;hmd.start();controllers.addControllerActionListener(listener);controllers.start()}
     suspend fun initialize(c:SpatialViewContent,p:Entity?) {
         content=c;panel=p;c.addEntity(root);p?.let{root.addChild(it);it.t.position=Vector3(0f,1.4f,-1.8f)}
         toolMounts.forEach{root.addChild(it)};root.addChild(voiceEntity);voiceEntity.components.set(ChannelAudioComponent())
         try {
-            val modelFiles=species+listOf("rift_wall","rift_floor")+listOf("fx_web","fx_laser","fx_energy","fx_pulse","fx_web_impact","fx_laser_impact","fx_energy_impact","fx_pulse_impact","fx_monster_dissolve","fx_rift_dust")+weapons.flatMap{w->val i=weapons.indexOf(w)+1;listOf("wp0${i}_${w}_left","wp0${i}_${w}_right")}
+            val modelFiles=species+listOf("trap_pulse","fx_ricochet","fx_surface_impact","fx_trap_pulse","rift_wall","rift_floor")+listOf("fx_web","fx_laser","fx_energy","fx_pulse","fx_web_impact","fx_laser_impact","fx_energy_impact","fx_pulse_impact","fx_monster_dissolve","fx_rift_dust")+weapons.flatMap{w->val i=weapons.indexOf(w)+1;listOf("wp0${i}_${w}_left","wp0${i}_${w}_right")}
             for(id in modelFiles){templates[id]=Entity.loadSuspend("asset://models/$id.glb").also{root.addChild(it);it.enabled=false}}
+            for(id in species){strides[id]=context.assets.open("models/$id.json").bufferedReader().use{JSONObject(it.readText()).getJSONObject("motion").getDouble("strideMeters").toFloat()}}
             // The pulse core uses the same proven native rendering path as the aim guide.
             // Prebuild it so a firing gesture never waits for skinned GLB animation evaluation.
             laserCoreTemplate=Entity().also{root.addChild(it);val material=UnlitMaterial.create();material.setBaseColor(Color4(1f,.91f,.72f,1f));material.setDepthTest(false);it.components.set(ModelComponent(MeshResource.createBox(Vector3(.010f,.010f,1f)),material));it.enabled=false}
@@ -92,6 +113,7 @@ class HuntRuntime(private val context:Context,private val scope:CoroutineScope) 
             val locale=if(context.resources.configuration.locales[0].language=="zh")"zh-CN" else "en"
             for(file in context.assets.list("audio/voice/$locale").orEmpty().filter{it.endsWith(".wav")})voices[file.removeSuffix(".wav")]=AudioResource.load("voice_${file.removeSuffix(".wav")}","asset://audio/voice/$locale/$file",LoadType.FROM_ASSETS).also{it.toGlobal()}
             if(context.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE!=0){
+                trace("ANIMATION_IMPORT_CHECK passed: ${verifyAnimationImport(root,templates.filterKeys{it in species||it=="trap_pulse"})}")
                 verifyAudioReuse(root,listOfNotNull(audio["rift_wall_crack_1"],audio["web_fire_1"],voices["hands_visible"]))
                 trace("AUDIO_REUSE_CHECK passed: repeated playback and emitter destruction")
                 trace("SURFACE_ALIGNMENT_CHECK passed: ${verifySurfaceAlignment(root)}")
@@ -111,11 +133,32 @@ class HuntRuntime(private val context:Context,private val scope:CoroutineScope) 
         trace("GESTURE_REGISTRATION_RESET source=tools");speak("hands_visible");emit()
     }
     fun confirmTools(){if(controllerUsed()||engine.phase!=HuntPhase.TOOLS||!gesture.registered)return;equipped.fill(false);handAttachments.forEach{it.reset()};stableRays.fill(null);engine.phase=HuntPhase.PICKUP;placeTools();trace("PICKUP_READY tool=$selected leftVisible=${tools[0]?.enabled} rightVisible=${tools[1]?.enabled}");speak("tool_pickup");emit()}
-    fun start(){if(controllerUsed()||!equipped.all{it})return;clearBattle();engine.start();gesture.suspendInput();combatTracking.reset();nextSpawn=2.5f;trace("GAME_START eligiblePlanes=${eligiblePlanes().size}");speak("mission_start");emit()}
-    fun retry(){if(controllerUsed())return;clearBattle();engine.phase=HuntPhase.TOOLS;equipped.fill(false);tools.forEach{it?.enabled=false};speak("tool_select");emit()}
+    fun prepareTraps(){if(controllerUsed()||engine.phase!=HuntPhase.PICKUP||!equipped.all{it})return
+        traps.reset();traps.suspendInput();engine.phase=HuntPhase.PLACEMENT;gesture.suspendInput();speak("trap_prepare");emit()}
+    fun undoTrap(){if(engine.phase!=HuntPhase.PLACEMENT||controllerUsed())return;traps.undo()?.let{t->trapVisuals.remove(t.id)?.let{e->val p=e.t.position.v();animate(e,"recover");temporary.add(e to(now+.8f));soundAt("trap_recover",p)}};emit()}
+    fun start(){if(controllerUsed()||engine.phase !in listOf(HuntPhase.PICKUP,HuntPhase.PLACEMENT)||!equipped.all{it})return;clearBattle();trapGhost?.enabled=false;rangeGhost?.enabled=false;placementCandidate=null;traps.suspendInput();trapVisuals.values.forEach{animate(it,"arm");soundAt("trap_arm",it.t.position.v())};engine.start();gesture.suspendInput();combatTracking.reset();nextSpawn=2.5f;trace("GAME_START eligiblePlanes=${eligiblePlanes().size}");speak("mission_start");emit()}
+    fun retry(){if(controllerUsed())return;clearTraps();clearBattle();engine.phase=HuntPhase.TOOLS;equipped.fill(false);tools.forEach{it?.enabled=false};speak("tool_select");emit()}
     private fun controllerUsed()=SystemClock.elapsedRealtime()-controllerAt<1500L
     private fun newModel(id:String,parent:Entity=root):Entity {val e=checkNotNull(templates[id]?.clone(Entity.CloneOptions(recursive=true,shouldShareMaterialInstance=true))){"Model clone failed: $id"};parent.addChild(e);e.enabled=true;return e}
-    private fun animate(e:Entity,name:String,loop:Boolean=false,freezeAtEnd:Boolean=false){for(skeleton in e.findSkeletonRootEntity()){skeleton.stopAllAnimations();val previous=activeAnimations.filter{it.first==skeleton};previous.forEach{it.second.close()};activeAnimations.removeAll(previous.toSet());val a=skeleton.getAnimationResources().firstOrNull{it.getName()==name}?:continue;val resource=a.repeat(if(loop)100000 else 0).also{it.toGlobal()};val player=skeleton.playAnimation(resource);if(freezeAtEnd){player.setTime((player.getDuration()-.001f).coerceAtLeast(0f));player.pause()};activeAnimations.add(skeleton to resource)}}
+    private fun animate(e:Entity,name:String,loop:Boolean=false,freezeAtEnd:Boolean=false,speed:Float=1f){
+        animationPlayers[e]?.forEach{retiredPlayers.add(it to(now+.16f))}
+        animationNames[e]=name
+        val players=mutableListOf<AnimationPlaybackController>()
+        for(skeleton in e.findSkeletonRootEntity()){
+            val a=skeleton.getAnimationResources().firstOrNull{it.getName()==name}?:continue
+            val previous=activeAnimations.filter{it.first==skeleton}
+            previous.forEach{retiredAnimations.add(it.second to(now+.16f))};activeAnimations.removeAll(previous.toSet())
+            val resource=a.repeat(if(loop)100000 else 0).also{it.toGlobal()}
+            val player=skeleton.playAnimation(resource,AnimationPlayConfig(transitionDuration=if(name=="crawl"||name=="idle"||name=="attack").10f else 0f))
+            player.setSpeed(speed);if(freezeAtEnd){player.setTime((player.getDuration()-.001f).coerceAtLeast(0f));player.pause()}
+            players.add(player);activeAnimations.add(skeleton to resource)
+        }
+        animationPlayers[e]=players
+    }
+    private fun locomotion(e:Entity,speciesIndex:Int,speed:Float){
+        val multiplier=creaturePlaybackSpeed(speed,strides[species[speciesIndex]]?:.08f)
+        if(animationNames[e]!="crawl")animate(e,"crawl",true,speed=multiplier)else animationPlayers[e]?.filter{it.valid}?.forEach{it.setSpeed(multiplier)}
+    }
     private fun collider(e:Entity,radius:Float){e.components.set(CollisionComponent(listOf(ShapeResource.createSphere(radius)),PhysicsMaterialResource()));e.components.set(RigidBodyComponent(MassProperties(),RigidBodyMode.KINEMATIC))}
     private fun emitter(position:V3,parent:Entity=root):Entity=Entity().also{parent.addChild(it);it.t.position=position.vec();it.components.set(ObjectAudioComponent(volume=.9f,distanceAttenuationMode=DistanceAttenuationMode.FIXED,reverbVolume=.1f))}
     private fun soundAt(id:String,position:V3,life:Float=3f):Entity? {val a=audio[id]?:return null;return emitter(position).also{it.playAudio(a);temporary.add(it to(now+life))}}
@@ -144,14 +187,25 @@ val dt=dtInput.coerceIn(0f,.05f);now+=dt
         if(engine.phase==HuntPhase.LOGO){logoTime+=dt;if(logoTime>=1.2f){engine.phase=if(SessionConsent.accepted)HuntPhase.GESTURE else HuntPhase.SAFETY;if(SessionConsent.accepted){LaunchActivity.current.get()?.requestTrackingPermissions();speak("hands_visible")}}}
         if(!handStarted&&SessionConsent.accepted&&ContextCompat.checkSelfPermission(context,"com.picovr.permission.HAND_TRACKING")==PackageManager.PERMISSION_GRANTED){val result=hands.start();handStarted=true;trace("HAND_PROVIDER start=$result support=${hands.supportState} state=${hands.state}")}
         startPlanesIfPermitted()
+        val planeRunning=planeStarted&&PlaneTrackingManager.state==TrackingState.RUNNING
+        roomTracking.update(planeRunning,if(planeStarted)dt else 0f)
+        roomAdapter.setAvailable(planeRunning)
+        if(!planeRunning)engine.paused=true
+        if(planeStarted&&!planeRunning&&planeWasRunning){roomSnapshots.invalidate();traps.suspendInput();trace("ROOM_TRACKING_LOST paused=true")}
+        if(roomTracking.expired&&!trackingExpired){planes.clear();roomAdapter.update(emptyList());clearTraps();trace("ROOM_TRACKING_EXPIRED reclaimed=true")}
+        trackingExpired=roomTracking.expired
+        if(planeRunning&&!planeWasRunning)refreshPlanes()
+        planeWasRunning=planeRunning
+        if(!surfaceCheckStarted&&roomAdapter.hasProxies&&context.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE!=0){surfaceCheckStarted=true;scope.launch{delay(300);if(!disposed)runCatching{roomAdapter.verifyNative(world)}.onSuccess{trace("ROOM_COLLISION_CHECK passed: $it")}.onFailure{trace("ROOM_COLLISION_CHECK failed: ${it.message}")}}}
         if(engine.phase==HuntPhase.RUNNING&&engine.paused!=wasPaused){
             trace("COMBAT_PAUSED value=${engine.paused} hands=$tracked controller=$blocked surfaces=${eligiblePlanes().size} foreground=$appActive")
             gesture.suspendInput()
-            for(p in projectiles){p.entity.components.set(PhysicsVelocityComponent(if(engine.paused)Vector3.ZERO else(p.direction*if(p.tool==0)10f else 7f).vec(),Vector3.ZERO));p.last=p.entity.t.position.v()}
-            threats.values.forEach{if(engine.paused)it.crawlPlayer?.pause() else it.crawlPlayer?.play()}
+            for(p in projectiles){p.entity.components.set(PhysicsVelocityComponent(if(engine.paused)Vector3.ZERO else(p.direction*p.motion.speed).vec(),Vector3.ZERO));p.last=p.entity.t.position.v()}
+            threats.values.forEach{v->if(engine.paused)v.crawlPlayer?.pause() else v.crawlPlayer?.play()
+                animationPlayers[v.body]?.filter{it.valid}?.forEach{if(engine.paused)it.pause()else it.resume()}}
         }
         wasPaused=engine.paused
-        val running=engine.phase==HuntPhase.RUNNING
+        val running=engine.phase==HuntPhase.RUNNING||engine.phase==HuntPhase.PLACEMENT
         val panelPose=panelFollower.update(head,forward,if(running)1.5f else 1.8f,if(running).4f else -.1f)
         panel?.t?.apply{position=panelPose.position.vec();quaternion=panelPose.rotation.quat()}
         if(engine.phase==HuntPhase.PICKUP)updateWaitingTools()
@@ -176,18 +230,41 @@ val dt=dtInput.coerceIn(0f,.05f);now+=dt
                 if(engine.phase==HuntPhase.RUNNING&&now-lastAimTrace>2f){trace("AIM hand=$i source=${ray.source} forwardDot=${ray.direction.dot(forward)}");if(i==1||latestRight==null)lastAimTrace=now}
             }
         }
+        if(engine.phase==HuntPhase.PLACEMENT)updatePlacement(blocked||!appActive||!room.available)
+        updateTrapVisuals()
         if(engine.phase==HuntPhase.RUNNING&&!engine.paused){engine.tick(dt);nextSpawn-=dt;if(nextSpawn<=0&&threats.size<7&&planes.isNotEmpty()){spawn();nextSpawn=Random.nextDouble(2.8,5.0).toFloat()}
             for(i in 0..1){val p=if(i==0)latestLeft else latestRight;if(gesture.fire(i,features(p),dt)&&p!=null)shoot(i)}
             updateBattle(dt,world)
+            for((trap,ids)in traps.tick(dt,room,engine.threats.filter{it.alive&&it.visible&&threats[it.id]?.emerged==true}.map{it.id to it.position})){
+                val p=room.surfaces[trap.anchorId]?.world(trap.localPosition)?:continue
+                trapVisuals.remove(trap.id)?.let{animate(it,"trigger");temporary.add(it to(now+.6f))}
+                effect("fx_trap_pulse",p,.8f);soundAt("trap_trigger",p)
+                ids.forEach{eliminate(it,3)};trace("TRAP_TRIGGER id=${trap.id} hits=${ids.size}")
+            }
         }
         if(engine.phase==HuntPhase.RESULTS&&lastPhase!=HuntPhase.RESULTS){trace("GAME_OVER kills=${engine.kills} survival=${engine.survival}");speak("mission_end");threats.values.forEach{it.crawlPlayer?.stop()}}
         if(lastPhase==HuntPhase.RUNNING&&engine.phase!=HuntPhase.RUNNING)projectiles.forEach{it.entity.components.set(PhysicsVelocityComponent(Vector3.ZERO,Vector3.ZERO))}
         lastPhase=engine.phase
+        val endedPlayers=retiredPlayers.filter{it.second<=now};endedPlayers.forEach{if(it.first.valid){it.first.stop();it.first.close()}};retiredPlayers.removeAll(endedPlayers.toSet())
+        val retired=retiredAnimations.filter{it.second<=now};retired.forEach{it.first.close()};retiredAnimations.removeAll(retired.toSet())
+        animationPlayers.keys.filter{!it.valid}.forEach{animationPlayers.remove(it);animationNames.remove(it)}
         val finishedAnimations=activeAnimations.filter{!it.first.valid};finishedAnimations.forEach{it.second.close()};activeAnimations.removeAll(finishedAnimations.toSet())
         val expired=temporary.filter{it.second<=now};expired.forEach{it.first.safeDestroy()};temporary.removeAll(expired.toSet());publish+=dt;if(publish>=.05f){publish=0f;emit()}
     }
-    private fun startPlanesIfPermitted(){if(planeStarted||!SessionConsent.accepted||ContextCompat.checkSelfPermission(context,"com.picovr.permission.SPATIAL_DATA")!=PackageManager.PERMISSION_GRANTED)return;planeStarted=true
-        val subscription=PlaneTrackingManager.subscribeAnchorUpdate { _ ->scope.launch{if(PlaneTrackingManager.state!=TrackingState.RUNNING)return@launch;val all=PlaneTrackingManager.loadAllAnchors();planes.clear();all.forEach{planes[it.anchorUUID]=it}}};cancelPlane={subscription.cancel()};PlaneTrackingManager.start();scope.launch{while(PlaneTrackingManager.state!=TrackingState.RUNNING){delay(100)};PlaneTrackingManager.loadAllAnchors().forEach{planes[it.anchorUUID]=it}}
+    private fun refreshPlanes(){
+        scope.launch{
+            val request=roomSnapshots.request()
+            val all=PlaneTrackingManager.loadAllAnchors()
+            if(disposed||!roomSnapshots.accepts(request)||PlaneTrackingManager.state!=TrackingState.RUNNING)return@launch
+            planes.clear();all.forEach{planes[it.anchorUUID]=it};roomAdapter.update(all.toList());traps.reconcile(room)
+        }
+    }
+    private fun startPlanesIfPermitted(){
+        if(planeStarted||!SessionConsent.accepted||ContextCompat.checkSelfPermission(context,"com.picovr.permission.SPATIAL_DATA")!=PackageManager.PERMISSION_GRANTED)return
+        planeStarted=true
+        val subscription=PlaneTrackingManager.subscribeAnchorUpdate{_->if(!disposed&&PlaneTrackingManager.state==TrackingState.RUNNING)refreshPlanes()}
+        cancelPlane={subscription.cancel()};PlaneTrackingManager.start()
+        scope.launch{while(!disposed&&PlaneTrackingManager.state!=TrackingState.RUNNING)delay(100);if(!disposed)refreshPlanes()}
     }
     private fun eligiblePlanes()=planes.values.filter{it.boundingBoxSize.x>.55f&&it.boundingBoxSize.y>.55f&&((it.semantics==SemanticLabelType.FLOOR&&it.planeOrientation==PlaneOrientation.HORIZONTAL_UPWARD)||(it.semantics==SemanticLabelType.WALL&&it.planeOrientation==PlaneOrientation.VERTICAL))&&it.indices.size>=3}
     private fun samplePlane(plane:PlaneAnchor):V3? {
@@ -241,7 +318,7 @@ val dt=dtInput.coerceIn(0f,.05f);now+=dt
     private fun updateBattle(dt:Float,world:Scene){for(t in engine.threats.toList()){val v=threats[t.id]?:continue
         if(!t.alive){v.dying+=dt;if(v.dying>1.2f){v.body.safeDestroy();v.frame.safeDestroy();v.crawl.safeDestroy();threats.remove(t.id);engine.pruneDead(t.id)};continue}
         if(v.portal.valid){val open=(if(v.moving)(1f-(now-v.closedAt)/1.5f)else t.age/1.5f).coerceIn(.025f,1f)*v.holeScale;v.portal.t.scaleVector=Vector3(open,open,open)}
-        val toward=(t.position-head).normalized();if(!t.visible&&t.age>.7f&&toward.dot(forward)>.67f){engine.reveal(t.id);trace("REVEAL id=${t.id}");v.body.enabled=true;animate(v.body,"crawl",true);soundAt("${species[t.species]}_emerge_1",t.position);v.cue=t.age}
+        val toward=(t.position-head).normalized();if(!t.visible&&t.age>.7f&&toward.dot(forward)>.67f){engine.reveal(t.id);trace("REVEAL id=${t.id}");v.body.enabled=true;animate(v.body,"crawl",true);locomotion(v.body,t.species,v.depth/2.5f);soundAt("${species[t.species]}_emerge_1",t.position);v.cue=t.age}
         if(t.visible&&!v.emerged){val progress=((t.age-v.cue)/2.5f).coerceIn(0f,1f);v.body.t.position=emergencePosition(progress,v.depth).vec();t.position=root.convertPositionFrom(Vector3.ZERO,v.body).v();v.crawl.t.position=t.position.vec()
             if(progress>=1f){val p=root.convertPositionFrom(Vector3.ZERO,v.body);v.body.components.remove(PortalCrossableComponent::class.java);check(v.body.setParent(root)){"Unable to detach emerged creature from portal"};t.position=pointOnSurface(p.v(),v.surfaceOrigin,v.surfaceRotation.rotateVector(Vector3(0f,1f,0f)).v());v.body.t.position=t.position.vec();v.body.t.quaternion=v.surfaceRotation;v.emerged=true;trace("EMERGED id=${t.id}")}
         }
@@ -254,19 +331,57 @@ val dt=dtInput.coerceIn(0f,.05f);now+=dt
             val normal=v.surfaceRotation.rotateVector(Vector3(0f,1f,0f)).v()
             val desired=if(v.wall)V3(0f,-1f,0f)else head-t.position;val delta=desired-normal*desired.dot(normal)
             val distance=V3(head.x-t.position.x,0f,head.z-t.position.z).length();val near=!v.wall&&distance<=.65f
-            if(!near){val movement=delta.normalized();t.position=pointOnSurface(t.position+movement*(dt*(.12f+engine.survival*.0004f)),v.surfaceOrigin,normal);v.body.t.position=t.position.vec();v.body.t.quaternion=surfaceRotation(normal,movement).quat();v.crawl.t.position=t.position.vec()}
+            if(!near&&!v.attack.active){val movement=delta.normalized();t.position=pointOnSurface(t.position+movement*(dt*(.12f+engine.survival*.0004f)),v.surfaceOrigin,normal);v.body.t.position=t.position.vec();v.body.t.quaternion=surfaceRotation(normal,movement).quat();v.crawl.t.position=t.position.vec();locomotion(v.body,t.species,.12f+engine.survival*.0004f)}
             when(v.attack.tick(dt,near)){
                 AttackEvent.PREPARE->{animate(v.body,"attack");soundAt("${species[t.species]}_windup_1",t.position);soundAt("${species[t.species]}_attack_1",t.position)}
-                AttackEvent.STRIKE->{soundAt("${species[t.species]}_landing_1",t.position);if(engine.attack(t.id)){speak(if(engine.lives==1)"last_life"else"player_hurt");soundAt("player_hurt",head)};animate(v.body,"crawl",true)}
+                AttackEvent.STRIKE->{soundAt("${species[t.species]}_landing_1",t.position);if(engine.attack(t.id)){speak(if(engine.lives==1)"last_life"else"player_hurt");soundAt("player_hurt",head)}}
+                AttackEvent.RECOVERED->{animate(v.body,if(near)"idle"else"crawl",true);if(!near)locomotion(v.body,t.species,.12f+engine.survival*.0004f)}
                 null->Unit
             }
 
         }
     }
-        for(p in projectiles.toList()){p.age+=dt;val current=p.entity.t.position.v()
+        for(p in projectiles.toList()){
+            p.age+=dt;val current=p.entity.t.position.v();val travel=current-p.last
+            p.motion.advance(dt,travel.length())
             if(p.tool==0)updateSilkTrail(p,(current-p.launch).length())
-            if(p.age-dt<.1f&&p.age>=.1f)trace("PROJECTILE_ADVANCE tool=${p.tool} distance=${(current-p.launch).length()} coreVisible=${p.core?.enabled}")
-            val travel=current-p.last;val len=travel.length();if(len>.00001f){val hits=world.rayCast(p.last.vec(),travel.normalized().vec(),len+.04f,CollisionCastHitMode.ALL,CollisionGroup(),root).results;val hit=engine.nearestEligibleHit(hits.mapNotNull{h->threats.entries.firstOrNull{it.value.body==h.entity}?.let{it.key to h.distance}});if(hit!=null){eliminate(hit,p.tool);p.entity.safeDestroy();projectiles.remove(p);continue}};p.last=current;if(p.age>1.4f){p.entity.safeDestroy();projectiles.remove(p)}}
+            var origin=p.last;var remaining=travel.length();var end=current;var removed=false
+            repeat(3){
+                if(removed||remaining<.00001f)return@repeat
+                val hit=combatHit(world,origin,p.direction,remaining,.025f)
+                if(hit==null){end=origin+p.direction*remaining;remaining=0f;return@repeat}
+                if(hit.enemy!=null){eliminate(hit.enemy,p.tool);removed=true;return@repeat}
+                val surface=hit.surface?:return@repeat
+                val position=surface.point
+                if(canRicochet(p.tool,surface.surface.kind)&&p.motion.reflect(surface.normal)){
+                    effect("fx_ricochet",position,.6f);soundAt("energy_ricochet_${Random.nextInt(1,4)}",position)
+                    remaining=(remaining-hit.distance).coerceAtLeast(0f)*.8f
+                    origin=position+surface.normal*.036f+p.direction*.01f;end=origin
+                    p.entity.t.quaternion=handRayRotation(p.direction,V3(0f,1f,0f)).quat()
+                    p.entity.components.set(PhysicsVelocityComponent((p.direction*p.motion.speed).vec(),Vector3.ZERO))
+                    trace("RICOCHET count=${p.motion.count} surface=${surface.surface.kind} speed=${p.motion.speed}")
+                }else{
+                    surfaceImpact(p.tool,surface);removed=true
+                }
+            }
+            if(removed||p.motion.expired){p.entity.safeDestroy();projectiles.remove(p)}else{p.entity.t.position=end.vec();p.last=end}
+        }
+    }
+    private val sweepShapeDelegate=lazy{ShapeResource.createSphere(.025f).also{it.toGlobal()}}
+    private val sweepShape by sweepShapeDelegate
+    private fun combatHit(world:Scene,origin:V3,direction:V3,length:Float,radius:Float=0f):CombatHit? {
+        val results=if(radius>0f)world.convexCast(sweepShape,origin.vec(),Quat.identity(),direction.vec(),length,CollisionCastHitMode.ALL,CollisionGroup(),root).results
+            else world.rayCast(origin.vec(),direction.vec(),length,CollisionCastHitMode.ALL,CollisionGroup(),root).results
+        val enemies=results.mapNotNull{h->threats.entries.firstOrNull{it.value.body==h.entity}?.let{(id,_)->engine.threats.firstOrNull{it.id==id&&it.alive&&it.visible}?.let{id to h.distance}}}
+        val analytic=room.cast(origin,direction,length)
+        val native=results.mapNotNull{h->roomAdapter.surfaceFor(h.entity)?.let{s->var n=h.normal.v().normalized();if(n.dot(direction)>0)n=n*-1f;SurfaceHit(s,h.distance,h.position.v(),n)}}.minByOrNull{it.distance}
+        val surface=listOfNotNull(analytic,native).minByOrNull{it.distance}
+        return nearestCombatHit(enemies,surface,length)
+    }
+    private fun surfaceImpact(tool:Int,hit:SurfaceHit){
+        val p=hit.point+hit.normal*.008f
+        effect("fx_surface_impact",p,.6f);soundAt("surface_impact_${Random.nextInt(1,3)}",p)
+        val mark=newModel("fx_${weapons[tool]}_impact");mark.t.position=p.vec();mark.t.quaternion=surfaceRotation(hit.normal,V3(0f,-1f,0f)).quat();animate(mark,"burst");temporary.add(mark to(now+if(tool==0)2f else .6f))
     }
     private data class HandRay(val origin:V3,val direction:V3,val rotation:Quat,val source:String)
     private fun updateHandRay(hand:Int,pose:HandPose,dt:Float):HandRay {
@@ -285,22 +400,33 @@ val dt=dtInput.coerceIn(0f,.05f);now+=dt
         trace("SHOT_TARGETS visible=${visibleTargets.size} closestCenterMissMeters=$closestMiss")
         animate(tools[hand]!!,"fire");soundAt("${weapons[selected]}_fire_1",pos)
         if(selected==1){
-            val hits=scene?.rayCast(pos.vec(),direction.vec(),7f,CollisionCastHitMode.ALL,CollisionGroup(),root)?.results.orEmpty()
-            val eligible=hits.mapNotNull{h->threats.entries.firstOrNull{it.value.body==h.entity}?.let{it.key to h.distance}}
-            val hit=engine.nearestEligibleHit(eligible);val distance=hit?.let{id->eligible.filter{it.first==id}.minOf{it.second}}?:7f
+            val hit=scene?.let{combatHit(it,pos,direction,7f)};val distance=hit?.distance?:7f
+            if(distance<=.17f){hit?.enemy?.let{eliminate(it,selected)};hit?.surface?.let{surfaceImpact(selected,it)};return}
             val e=newModel("fx_laser");e.t.position=(pos+direction*.17f).vec();e.t.quaternion=rot;e.t.scaleVector=Vector3(2f,2f,beamLengthScale(distance));animate(e,"flight",freezeAtEnd=true);temporary.add(e to(now+.32f))
             val length=.9f*beamLengthScale(distance)
             val core=checkNotNull(laserCoreTemplate?.clone(Entity.CloneOptions(recursive=true,shouldShareMaterialInstance=true)))
             root.addChild(core);core.t.position=(pos+direction*(.17f+length*.5f)).vec();core.t.quaternion=rot;core.t.scaleVector=Vector3(1f,1f,length);core.enabled=true;temporary.add(core to(now+.32f))
-            trace("LASER_VISUAL coreVisible=${core.enabled} length=$length lifetimeMs=320 sdkHits=${hits.size} eligibleHits=${eligible.size}")
-            hit?.let{eliminate(it,selected)}
+            trace("LASER_VISUAL coreVisible=${core.enabled} length=$length lifetimeMs=320 blockedBySurface=${hit?.surface!=null}")
+            hit?.enemy?.let{eliminate(it,selected)};hit?.surface?.let{surfaceImpact(selected,it)}
         }else{
-            val e=Entity();root.addChild(e);e.t.position=(pos+direction*.17f).vec();e.t.quaternion=rot
+            val motion=RicochetState(direction,if(selected==0)10f else 7f)
+            var launch=pos+direction*.17f
+            val muzzleHit=scene?.let{combatHit(it,pos,direction,.17f,.025f)}
+            if(muzzleHit!=null){
+                if(muzzleHit.enemy!=null){eliminate(muzzleHit.enemy,selected);return}
+                val surface=muzzleHit.surface?:return
+                if(canRicochet(selected,surface.surface.kind)&&motion.reflect(surface.normal)){
+                    launch=surface.point+surface.normal*.036f+motion.direction*.01f
+                    effect("fx_ricochet",surface.point,.6f);soundAt("energy_ricochet_${Random.nextInt(1,4)}",surface.point)
+                    motion.advance(0f,muzzleHit.distance)
+                }else{surfaceImpact(selected,surface);return}
+            }
+            val e=Entity();root.addChild(e);e.t.position=launch.vec();e.t.quaternion=handRayRotation(motion.direction,V3(0f,1f,0f)).quat()
             val visual=newModel("fx_${weapons[selected]}",e);visual.t.position=Vector3(0f,0f,when(selected){0->.75f;2->.2f;else->.3f});animate(visual,"flight",freezeAtEnd=true)
             val core=if(selected==0)checkNotNull(silkCoreTemplate?.clone(Entity.CloneOptions(recursive=true,shouldShareMaterialInstance=true))).also{e.addChild(it);it.enabled=true}else null
-            val projectile=Projectile(e,visual,core,selected,direction,pos+direction*.17f,pos+direction*.17f)
+            val projectile=Projectile(e,visual,core,selected,motion,launch,launch)
             if(selected==0)updateSilkTrail(projectile,0f)
-            collider(e,.025f);e.components.set(PhysicsVelocityComponent((direction*if(selected==0)10f else 7f).vec(),Vector3.ZERO));projectiles.add(projectile)
+            collider(e,.025f);e.components.set(PhysicsVelocityComponent((motion.direction*motion.speed).vec(),Vector3.ZERO));projectiles.add(projectile)
             trace("PROJECTILE_VISUAL tool=$selected modelVisible=${visual.enabled} coreVisible=${core?.enabled}")
         }
         trace("SHOT hand=$hand tool=$selected inputAgeMs=$inputAge aim=${ray.source} forwardDot=${direction.dot(forward)}")
@@ -312,9 +438,57 @@ val dt=dtInput.coerceIn(0f,.05f);now+=dt
         projectile.core?.t?.apply{position=Vector3(0f,0f,length*.5f);scaleVector=Vector3(1f,1f,length)}
     }
     private fun eliminate(id:Int,tool:Int){if(!engine.kill(id))return;trace("HIT id=$id tool=$tool kills=${engine.kills}");val v=threats[id]?:return;val t=engine.threats.first{it.id==id};animate(v.body,"fall");v.crawlPlayer?.stop();effect("fx_${weapons[tool]}_impact",t.position);effect("fx_monster_dissolve",t.position,1.2f);soundAt("${species[t.species]}_die_1",t.position);soundAt("${weapons[tool]}_impact_1",t.position)}
+    private fun updatePlacement(blocked:Boolean){
+        placementCandidate=null
+        if(blocked){traps.suspendInput();trapGhost?.enabled=false;rangeGhost?.enabled=false;return}
+        val activeHand=if(latestRight!=null)1 else 0
+        traps.pinch(1-activeHand,null,null,room)
+        for(hand in listOf(activeHand)){
+            val pose=if(hand==0)latestLeft else latestRight
+            val ray=stableRays[hand]
+            val pinch=if(hand==0)handData?.leftPinch else handData?.rightPinch
+            if(pose==null||ray==null||pinch?.isReady!=true){traps.pinch(hand,null,null,room);continue}
+            val hit=room.cast(ray.origin,ray.direction,3.5f)?.takeIf{it.distance>=.30f&&room.canPlace(it)&&traps.locationFree(it.point,room)}
+            // UI pinches must not also place a device through the operation panel.
+            val panelHit=panel?.let{owner->
+                val o=owner.convertPositionFrom(ray.origin.vec(),root).v()
+                val d=(owner.convertPositionFrom((ray.origin+ray.direction).vec(),root).v()-o).normalized()
+                val distance=if(abs(d.z)>.0001f)-o.z/d.z else -1f
+                val p=o+d*distance
+                distance>0f&&distance<(hit?.distance?:3.5f)&&abs(p.x)<.55f&&abs(p.y)<.37f
+            }?:false
+            val candidate=if(panelHit)null else hit
+            if(placementCandidate==null)placementCandidate=candidate
+            val pinched=when{pinch.pinchValue>.8f->true;pinch.pinchValue<.2f->false;else->continue}
+            val placed=traps.pinch(hand,pinched,candidate,room)
+            if(placed!=null){
+                val e=newModel("trap_pulse");trapVisuals[placed.id]=e;animate(e,"deploy")
+                soundAt("trap_place",candidate!!.point);trace("TRAP_PLACED id=${placed.id} anchor=${placed.anchorId}")
+                if(traps.traps.size==2)speak("trap_limit")
+            }
+        }
+        val hit=placementCandidate
+        if(hit!=null&&traps.traps.size<2){
+            val ghost=trapGhost?:newModel("trap_pulse").also{it.components.set(OpacityControllerComponent(.40f));trapGhost=it;animate(it,"idle",true)}
+            ghost.enabled=true;ghost.t.position=(hit.point+hit.normal*.012f).vec();ghost.t.quaternion=surfaceRotation(hit.normal,V3(0f,0f,-1f)).quat()
+            val range=rangeGhost?:newModel("fx_trap_pulse").also{it.components.set(OpacityControllerComponent(.22f));rangeGhost=it;animate(it,"burst")}
+            range.enabled=true;range.t.position=ghost.t.position;range.t.scaleVector=Vector3(1.04f,1.04f,1.04f)
+            animationPlayers[range]?.filter{it.valid}?.forEach{it.setTime(.70f);it.pause()}
+        }else{trapGhost?.enabled=false;rangeGhost?.enabled=false}
+    }
+    private fun updateTrapVisuals(){
+        traps.reconcile(room)
+        for(id in trapVisuals.keys.toList())if(traps.traps.none{it.id==id})trapVisuals.remove(id)?.safeDestroy()
+        for(t in traps.traps){
+            val surface=room.surfaces[t.anchorId]?:continue;val e=trapVisuals[t.id]?:continue
+            val normal=surface.rotation.rotate(t.localNormal)
+            e.enabled=room.available;e.t.position=(surface.world(t.localPosition)+normal*.012f).vec();e.t.quaternion=surfaceRotation(normal,surface.rotation.rotate(V3(0f,0f,-1f))).quat()
+        }
+    }
+    private fun clearTraps(){traps.reset();trapVisuals.values.forEach{it.safeDestroy()};trapVisuals.clear();trapGhost?.safeDestroy();trapGhost=null;rangeGhost?.safeDestroy();rangeGhost=null;placementCandidate=null}
     private fun clearBattle(){threats.values.forEach{it.body.safeDestroy();it.frame.safeDestroy();it.crawl.safeDestroy()};threats.clear();projectiles.forEach{it.entity.safeDestroy()};projectiles.clear()}
-    private fun emit(){val phaseLabel=if(context.resources.configuration.locales[0].language=="zh")when(engine.phase){HuntPhase.LOGO->"启动中";HuntPhase.SAFETY->"安全提示";HuntPhase.GESTURE->"手势注册";HuntPhase.TOOLS->"工具选择";HuntPhase.PICKUP->"双手接取";HuntPhase.RUNNING->"任务进行中";HuntPhase.RESULTS->"任务结算"}else engine.phase.name
+    private fun emit(){val phaseLabel=if(context.resources.configuration.locales[0].language=="zh")when(engine.phase){HuntPhase.LOGO->"启动中";HuntPhase.SAFETY->"安全提示";HuntPhase.GESTURE->"手势注册";HuntPhase.TOOLS->"工具选择";HuntPhase.PICKUP->"双手接取";HuntPhase.PLACEMENT->"布置机关";HuntPhase.RUNNING->"任务进行中";HuntPhase.RESULTS->"任务结算"}else engine.phase.name
         panel?.components?.get(AccessibilityComponent::class.java)?.let{if(it.value!=phaseLabel)it.value=phaseLabel}
-        state=HuntSnapshot(engine.phase,engine.lives,engine.kills,engine.survival.toInt(),engine.grade(),gesture.progress/2.5f,selected,equipped[0],equipped[1],controllerUsed(),if(engine.phase==HuntPhase.RUNNING)combatTracking.ready else latestLeft!=null&&latestRight!=null,loading,eligiblePlanes().size,error,engine.invulnerable>1.7f,ContextCompat.checkSelfPermission(context,"com.picovr.permission.HAND_TRACKING")==PackageManager.PERMISSION_GRANTED,gesture.adjusting,(if(gesture.isArmed(0))1 else 0)+(if(gesture.isArmed(1))2 else 0))}
-    fun dispose(){eventWriter.shutdown();voiceController?.stop();voiceController?.close();hands.stop();hmd.stop();controllers.removeControllerActionListener(listener);controllers.stop();cancelFrame?.invoke();cancelPlane?.invoke();if(planeStarted)PlaneTrackingManager.stop();clearBattle();root.safeDestroy();activeAnimations.forEach{it.second.close()};activeAnimations.clear();audio.values.forEach{it.close()};voices.values.forEach{it.close()}}
+        state=HuntSnapshot(engine.phase,engine.lives,engine.kills,engine.survival.toInt(),engine.grade(),gesture.progress/2.5f,selected,equipped[0],equipped[1],controllerUsed(),if(engine.phase==HuntPhase.RUNNING)combatTracking.ready else latestLeft!=null&&latestRight!=null,loading,eligiblePlanes().size,error,engine.invulnerable>1.7f,ContextCompat.checkSelfPermission(context,"com.picovr.permission.HAND_TRACKING")==PackageManager.PERMISSION_GRANTED,gesture.adjusting,(if(gesture.isArmed(0))1 else 0)+(if(gesture.isArmed(1))2 else 0),traps.traps.size,placementCandidate!=null,if(latestRight!=null)1 else 0)}
+    fun dispose(){disposed=true;roomSnapshots.invalidate();eventWriter.shutdown();clearTraps();roomAdapter.close();voiceController?.stop();voiceController?.close();hands.stop();hmd.stop();controllers.removeControllerActionListener(listener);controllers.stop();cancelFrame?.invoke();cancelPlane?.invoke();if(planeStarted)PlaneTrackingManager.stop();clearBattle();root.safeDestroy();retiredPlayers.forEach{if(it.first.valid){it.first.stop();it.first.close()}};retiredPlayers.clear();activeAnimations.forEach{it.second.close()};activeAnimations.clear();retiredAnimations.forEach{it.first.close()};retiredAnimations.clear();animationPlayers.clear();if(sweepShapeDelegate.isInitialized())sweepShape.close();audio.values.forEach{it.close()};voices.values.forEach{it.close()}}
 }

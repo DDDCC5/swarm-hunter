@@ -1,0 +1,32 @@
+{
+  "zh-CN": {
+    "title": "布置脉冲机关",
+    "hint": "对准已扫描的桌面或墙面，捏合确认放置。",
+    "valid": "此处可放置",
+    "invalid": "这里放不稳，换个位置。",
+    "quota": "剩余机关 2 / 2",
+    "detail": "邻近触发 · 球形能量范围",
+    "undo": "撤销上一个",
+    "done": "完成布置",
+    "optional": "布置是可选的，也可直接开始任务。",
+    "place": "布置机关",
+    "start": "开始任务",
+    "ready": "双手已就绪",
+    "equipment": "靠近自动装备，发射动作仅在任务中生效。"
+  },
+  "en": {
+    "title": "Place pulse traps",
+    "hint": "Aim at a scanned table or wall. Pinch to place.",
+    "valid": "Ready to place",
+    "invalid": "Try another surface.",
+    "quota": "Traps remaining 2 / 2",
+    "detail": "Proximity trigger · Spherical pulse",
+    "undo": "Undo last",
+    "done": "Finish placing",
+    "optional": "Placement is optional. You can start without traps.",
+    "place": "Place traps",
+    "start": "Start mission",
+    "ready": "Both hands ready",
+    "equipment": "Reach to equip. Firing starts only during the mission."
+  }
+}

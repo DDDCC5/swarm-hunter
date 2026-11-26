@@ -72,7 +72,30 @@ private val Ink=Color(0xFF2C1E15);private val Ivory=Color(0xFFF2E8D8);private va
                     s.phase==HuntPhase.PICKUP->Panel(words("把双手放上去","Place your hands into the tools"),words("任意手型，手掌靠近对应工具即可自动装备。","Any hand shape works. Move each palm close to its tool to equip.")){
                         Row(horizontalArrangement=Arrangement.spacedBy(70.dp)){Label(if(s.equippedLeft)words("左手已就绪","Left ready")else words("等待左手","Waiting for left hand"),26,if(s.equippedLeft)Copper else Muted);Label(if(s.equippedRight)words("右手已就绪","Right ready")else words("等待右手","Waiting for right hand"),26,if(s.equippedRight)Copper else Muted)}
                         Label(words("无需做发射动作。装备后工具跟手，开始任务后才可发射。","No firing pose needed. Tools follow your hands once equipped; fire after starting."),22)
-                        Action(words("开始任务","Start mission"),s.equippedLeft&&s.equippedRight){runtime.start()}
+                        Row(horizontalArrangement=Arrangement.spacedBy(20.dp)){
+                            Action(words("布置机关","Place traps"),s.equippedLeft&&s.equippedRight){runtime.prepareTraps()}
+                            Action(words("直接开始任务","Start without traps"),s.equippedLeft&&s.equippedRight){runtime.start()}
+                        }
+                    }
+                    s.phase==HuntPhase.PLACEMENT->Box(Modifier.fillMaxSize(),contentAlignment=Alignment.Center){
+                        Art("placement_panel",Modifier.fillMaxSize())
+                        Column(Modifier.padding(44.dp).fillMaxSize(),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(22.dp,Alignment.CenterVertically)){
+                            Label(words("布置脉冲机关","Place pulse traps"),36,bold=true)
+                            Label(words(if(s.placementHand==1)"右手对准已扫描表面，松开后捏合确认。"else"左手对准已扫描表面，松开后捏合确认。",if(s.placementHand==1)"Aim your right hand at a scanned surface. Release, then pinch."else"Aim your left hand at a scanned surface. Release, then pinch."),21,Muted)
+                            Row(horizontalArrangement=Arrangement.spacedBy(28.dp),verticalAlignment=Alignment.CenterVertically){
+                                Art("trap_thumbnail",Modifier.size(170.dp))
+                                Column(horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(16.dp)){
+                                    Label(words("剩余机关 ${2-s.trapsPlaced} / 2","Traps remaining ${2-s.trapsPlaced} / 2"),26,bold=true)
+                                    Label(if(s.trapsPlaced>=2)words("机关都放好了，准备战斗！","All traps placed. Ready to hunt!")else if(s.placementValid)words("此处可放置","Ready to place")else words("寻找完整表面，避开边缘。","Find a clear surface, away from edges."),23,Copper,true)
+                                    Label(words("邻近触发 · 球形能量范围","Proximity trigger · Spherical pulse"),21,Muted)
+                                }
+                            }
+                            Label(words("布置是可选的，也可直接开始任务。","Placement is optional. You can start now."),21,Muted)
+                            Row(horizontalArrangement=Arrangement.spacedBy(20.dp)){
+                                Action(words("撤销上一个","Undo last"),s.trapsPlaced>0){runtime.undoTrap()}
+                                Action(words("完成布置","Finish placement")){runtime.start()}
+                            }
+                        }
                     }
                     s.phase==HuntPhase.RUNNING->Column(Modifier.fillMaxWidth().padding(14.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(14.dp)){
                         Row(Modifier.background(Brown.copy(alpha=.90f),RoundedCornerShape(22.dp)).padding(20.dp),horizontalArrangement=Arrangement.spacedBy(32.dp),verticalAlignment=Alignment.CenterVertically){Row{for(i in 0..2)Art(if(i<s.lives)"life_full"else"life_empty",Modifier.size(42.dp))};Label(words("消灭 ${s.kills}","Eliminated ${s.kills}"),24,Ivory,bold=true);Label(words("存活 ","Survival ")+"%02d:%02d".format(s.seconds/60,s.seconds%60),24,Ivory,bold=true)}

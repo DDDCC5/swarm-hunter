@@ -1,0 +1,21 @@
+{
+  "id": "fx_surface_impact",
+  "name": "现实表面弹着粉尘",
+  "kind": "effect",
+  "spanMeters": 0.24,
+  "triangles": 2240,
+  "bones": 29,
+  "clips": [
+    {
+      "name": "burst",
+      "frames": [
+        0.0,
+        18.0
+      ],
+      "fps": 30
+    }
+  ],
+  "worldUp": "+Y",
+  "worldForward": "-Z",
+  "surfaceNormalAxis": "+Y"
+}

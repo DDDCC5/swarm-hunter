@@ -2,67 +2,99 @@
   "id": "in01_roach",
   "name": "棕褐蟑螂",
   "kind": "roach",
+  "revision": "quality-v2",
   "spanMeters": 0.15,
   "legCount": 6,
   "bones": 19,
+  "triangles": 20448,
+  "motion": {
+    "fps": 30,
+    "strideMeters": 0.048,
+    "cycleSeconds": 1.0,
+    "stanceRatio": 0.64,
+    "attackDurationSeconds": 1.2,
+    "attackContactSeconds": 0.56,
+    "attackContactWindow": [
+      0.52,
+      0.64
+    ],
+    "rootTravelBaked": false,
+    "worldUp": "+Y",
+    "worldForward": "-Z",
+    "rootTravelScope": "idle,crawl,turn_left,turn_right,attack,hit; emerge/emerge_floor/fall contain clip-local displacement"
+  },
   "clips": [
     {
       "name": "idle",
       "frames": [
-        1.0,
-        48.0
+        0.0,
+        60.0
       ],
-      "fps": 24
+      "fps": 30
     },
     {
       "name": "crawl",
       "frames": [
-        1.0,
-        48.0
+        0.0,
+        30.0
       ],
-      "fps": 24
+      "fps": 30
+    },
+    {
+      "name": "turn_left",
+      "frames": [
+        0.0,
+        30.0
+      ],
+      "fps": 30
+    },
+    {
+      "name": "turn_right",
+      "frames": [
+        0.0,
+        30.0
+      ],
+      "fps": 30
     },
     {
       "name": "emerge",
       "frames": [
-        1.0,
-        72.0
+        0.0,
+        60.0
       ],
-      "fps": 24
+      "fps": 30
     },
     {
       "name": "emerge_floor",
       "frames": [
-        1.0,
-        72.0
+        0.0,
+        60.0
       ],
-      "fps": 24
+      "fps": 30
     },
     {
       "name": "attack",
       "frames": [
-        1.0,
+        0.0,
         36.0
       ],
-      "fps": 24
+      "fps": 30
     },
     {
       "name": "hit",
       "frames": [
-        1.0,
-        18.0
+        0.0,
+        12.0
       ],
-      "fps": 24
+      "fps": 30
     },
     {
       "name": "fall",
       "frames": [
-        1.0,
-        36.0
+        0.0,
+        30.0
       ],
-      "fps": 24
+      "fps": 30
     }
-  ],
-  "meshes": 1,
-  "triangles": 10912
+  ]
 }

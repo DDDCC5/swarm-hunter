@@ -1,0 +1,53 @@
+{
+  "id": "trap_pulse",
+  "name": "脉冲机关",
+  "kind": "trap",
+  "spanMeters": 0.22,
+  "triangles": 7884,
+  "bones": 5,
+  "clips": [
+    {
+      "name": "deploy",
+      "frames": [
+        0.0,
+        30.0
+      ],
+      "fps": 30
+    },
+    {
+      "name": "idle",
+      "frames": [
+        0.0,
+        60.0
+      ],
+      "fps": 30
+    },
+    {
+      "name": "arm",
+      "frames": [
+        0.0,
+        24.0
+      ],
+      "fps": 30
+    },
+    {
+      "name": "trigger",
+      "frames": [
+        0.0,
+        18.0
+      ],
+      "fps": 30
+    },
+    {
+      "name": "recover",
+      "frames": [
+        0.0,
+        24.0
+      ],
+      "fps": 30
+    }
+  ],
+  "worldUp": "+Y",
+  "worldForward": "-Z",
+  "surfaceNormalAxis": "+Y"
+}

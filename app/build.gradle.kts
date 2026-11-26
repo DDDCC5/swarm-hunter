@@ -12,8 +12,8 @@ android {
         applicationId = "com.example.swarmhunter"
         minSdk = 35
         targetSdk = 35
-        versionCode = 13
-        versionName = "1.0.12"
+        versionCode = 14
+        versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk { abiFilters.add("arm64-v8a") }

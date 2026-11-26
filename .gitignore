@@ -48,3 +48,7 @@ docs/phase3/
 *.p12
 *.pem
 *.key
+
+# Private iteration plans and execution records
+docs/iterations/
+.superpowers/

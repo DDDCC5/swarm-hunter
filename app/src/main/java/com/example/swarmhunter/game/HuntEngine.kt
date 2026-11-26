@@ -29,10 +29,10 @@ fun raySphere(origin:V3,direction:V3,center:V3,radius:Float):Float? {
     val first=-b-sqrt(h);val last=-b+sqrt(h)
     return when {first>=0->first;last>=0->last;else->null}
 }
-enum class HuntPhase { LOGO, SAFETY, GESTURE, TOOLS, PICKUP, RUNNING, RESULTS }
+enum class HuntPhase { LOGO, SAFETY, GESTURE, TOOLS, PICKUP, PLACEMENT, RUNNING, RESULTS }
 fun toolVisible(phase:HuntPhase,equipped:Boolean,tracked:Boolean)=when(phase){
     HuntPhase.PICKUP->!equipped||tracked
-    HuntPhase.RUNNING->equipped&&tracked
+    HuntPhase.PLACEMENT,HuntPhase.RUNNING->equipped&&tracked
     else->false
 }
 data class Threat(val id:Int,val species:Int,var position:V3,var visible:Boolean=false,var alive:Boolean=true,var age:Float=0f,var windup:Float=0f)
@@ -102,7 +102,7 @@ class GestureMemory {
     }
     fun fire(hand:Int,features:List<Float>?,dt:Float):Boolean {
         val target=template?:return false
-        if(features==null){missing[hand]+=dt;if(missing[hand]>1f){armed[hand]=false;released[hand]=0f};return false}
+        if(features==null){missing[hand]+=dt;armed[hand]=false;released[hand]=0f;return false}
         missing[hand]=0f
         val d=distance(target,features)
         if(d>.30f){released[hand]+=dt;if(released[hand]>=.15f)armed[hand]=true;return false}
@@ -114,16 +114,23 @@ class GestureMemory {
     fun reset(){registered=false;progress=0f;candidate=null;template=null;captureMean=null;smoothedLeft=null;smoothedRight=null;invalidTime=0f;adjusting=false;released.fill(0f);armed.fill(false);missing.fill(0f)}
 }
 
-enum class AttackEvent { PREPARE, STRIKE }
+enum class AttackEvent { PREPARE, STRIKE, RECOVERED }
+/** Contact at the authored frame; recovery survives a target stepping out of range. */
 class AttackCycle {
     private var cooldown=0f
-    private var winding=false
+    var active=false;private set
     private var elapsed=0f
+    private var contacted=false
     fun tick(dt:Float,near:Boolean):AttackEvent? {
-        cooldown=(cooldown-dt).coerceAtLeast(0f)
-        if(!near){winding=false;elapsed=0f;return null}
-        if(winding){elapsed+=dt;if(elapsed>=.6f){winding=false;elapsed=0f;cooldown=1.5f;return AttackEvent.STRIKE};return null}
-        if(cooldown<=0f){winding=true;elapsed=0f;return AttackEvent.PREPARE}
+        val step=dt.coerceAtLeast(0f)
+        cooldown=(cooldown-step).coerceAtLeast(0f)
+        if(active){
+            elapsed+=step
+            if(!contacted&&elapsed>=.56f){contacted=true;cooldown=1.5f;if(near)return AttackEvent.STRIKE}
+            if(elapsed>=1.2f){active=false;return AttackEvent.RECOVERED}
+            return null
+        }
+        if(near&&cooldown<=0f){active=true;elapsed=0f;contacted=false;return AttackEvent.PREPARE}
         return null
     }
 }
@@ -160,7 +167,7 @@ fun surfaceRotation(normal:V3,forward:V3):Q4 {
     return Q4.axisAngle(n,angle)*up
 }
 fun emergencePosition(progress:Float,depth:Float):V3 {val t=progress.coerceIn(0f,1f);val s=t*t*(3f-2f*t);return V3(0f,.14f*s*s,-depth*(1f-s)+.012f*s)}
-fun beamLengthScale(hitDistance:Float)=((hitDistance-.17f).coerceAtLeast(.05f))/.9f
+fun beamLengthScale(hitDistance:Float)=((hitDistance-.17f).coerceAtLeast(0f))/.9f
 
 /** Limit the visible trail to travelled distance so it never starts 0.75m behind the muzzle. */
 fun projectileTrailLength(travelled:Float)=travelled.coerceIn(.06f,.75f)
