@@ -52,3 +52,8 @@ docs/phase3/
 # Private iteration plans and execution records
 docs/iterations/
 .superpowers/
+
+# Local planning and device evidence (public reports are summarized separately)
+docs/superpowers/
+docs/verification/
+scripts/__pycache__/

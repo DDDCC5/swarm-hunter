@@ -2,61 +2,51 @@
 
 <img src="docs/media/icon.png" width="120" alt="虫潮猎手应用图标" />
 
-在真实空间中听声辨位、抬手出击的 PICO Spatial MR 虫群猎杀游戏。自定义你的发射手势，靠近悬浮猎具即可装备，再消灭从墙面和地面裂口爬出的蜘蛛与昆虫。
+PICO Spatial MR 虫群猎杀游戏。记录自己的静态手势，靠近悬浮护腕装备，在真实空间中消灭从地面、墙面和已扫描天花板裂口出现的蜘蛛与昆虫。
 
-- **当前体验版**：1.1.0 debug（versionCode 14）
+- **当前体验版**：1.3.2 debug（versionCode 20）
 - **包名**：`com.example.swarmhunter`
-- **安装包**：[GitHub Releases](https://github.com/DDDCC5/swarm-hunter/releases/tag/v1.1.0)
-- **测试与限制**：[VERIFICATION.md](docs/VERIFICATION.md)
+- **安装包**：[v1.3.2 Releases](https://github.com/DDDCC5/swarm-hunter/releases/tag/v1.3.2)
+- **版本说明**：[1.3.2](docs/RELEASE_NOTES_1.3.2.md)
+- **验证与限制**：[VERIFICATION.md](docs/VERIFICATION.md)
 
 ## 玩法
 
-1. 阅读安全提示，放下手柄并允许手部及空间追踪权限。
-2. 双手做一致的任意静态手势，保持约 2.5 秒，注册为发射动作。
-3. 挥手或手势点击选择蛛丝、激光、能量弹或脉冲；可点击“重新注册手势”返回重录。
-4. 将自然张开的双手分别靠近左右悬浮道具，自动装备，无需做发射动作。
-5. 可先布置最多两个脉冲机关，或直接开始任务；听方位音寻找目标。先改变手型，再做注册手势发射，命中后计数增加。
-6. 三条生命耗尽后结算击杀、累计存活时长与评级，可再次挑战。
+1. 在安全空间内确认提示，放下手柄，全程使用双手手势。
+2. 双手保持相同的自定义静态手势约2.5秒，分别记录左右手。
+3. 选择蛛丝、激光、能量弹或脉冲，双手靠近对应悬浮道具即可装备，无需先做发射手势；可返回重新注册。
+4. 可选无伤练习、三种难度，以及最多两个脉冲机关。机关通过视野中心选择真实平面，任一手拇指食指捏合确认；墙面竖贴，地面/桌面平放。
+5. 当前手型匹配注册手势时持续发射；手型不匹配或追踪丢失就停止新增射击。每手独立冷却，蛛丝0.20秒、激光0.15秒、能量弹0.32秒、脉冲0.55秒。
+6. 昆虫可见出洞动作与其专属声音由同一事件触发，不再等待转头显形。敌群由疏到密；命中、击杀和机关触发有反馈。
+7. 三条生命耗尽后结算击杀、累计存活时长、命中率及评级，可再次挑战。
 
-面板持续跟随用户前方并保持竖直，已接取的工具使用稳定手部跟随；没有常驻辅助瞄准线。中文系统使用中文界面和语音，其他系统使用英文；应用内不混排两种语言。音量跟随系统。
+面板跟随用户前方并保持竖直；护腕跟随与手指识别分离，没有常驻辅助瞄准线。中文系统只显示中文界面和语音，其他系统使用英文。音量跟随系统。
 
-## 1.1.0 更新
+## 1.3.2 更新
 
-- 8种生物升级关节、足爪、口器/触角和PBR材质，补齐完整动作，并按步幅匹配爬行位移。
-- 攻击在0.56秒接触判定，保留完整1.2秒收招，避免提前切回爬行。
-- 能量弹命中扫描墙面最多反弹两次，每次速度降低20%；命中地面或桌面终止。其他工具增加表面弹着反馈。
-- 开局前可选放置最多两个单次脉冲机关，支持虚影/范围预览、捏合确认和撤销。邻近目标触发后消耗，墙体阻挡触发与伤害，桌面不屏蔽球形能量场。
-- 修复近墙发射穿透、双手重复放置、短暂失追和过期平面数据回写；继续保留无常驻辅助瞄准线的交互。
-- debug编译和55项单元测试通过。实景画面、反弹及机关玩法、舒适度和性能仍待人工验收。
+- 八种虫类全部采用Tripo来源的本地绑定模型，四款简洁护腕按功能区分配色，并使用各自实际炮口坐标。
+- 修复注册结束后手型难以发射；保持匹配手型连发，失配即停，并落实四武器独立发射节奏。
+- 机关改为视野中心注视平面、任一手捏合放置；有限边界、面板遮挡、释放门控及撤销保护。
+- 出场音画统一触发；虫体线性尺寸缩小约44%，巢穴随体型缩小，支持地/墙/顶随机出怪和渐进密度。
+- 完整播放1秒翻倒收腿，再消散淡出至1.7秒清理；墙顶尸体下落。各虫种使用独立出场录音与不同节奏。
+- 优化贴面运动、墙地/顶墙连续转角和步幅匹配；保留能量弹墙面反弹、表面弹着和脉冲机关。
 
-## 功能与实现
+以下是当前运行素材的离线渲染预览，**不是实机战斗截图**：
 
-- Kotlin 2.1.20、Compose、PICO Spatial SDK BOM 6.2.8。
-- 官方手部追踪与自定义关节特征识别；注册容错、释放后重射及失追处理。
-- 手掌/手腕近距离自动接取；工具跟随与手指发射识别分离。
-- MR 透视、平面几何法线对齐、Portal 裂口进出及贴面移动。
-- 原生物理投射体与连续扫掠检测；能量弹墙面反弹、可选表面机关；三命、短暂无敌、结算及重开。
-- 5种蜘蛛、3种辅助昆虫、4种工具；32个GLB、180个音效及36个中英文语音WAV。
-- 启动图标为全画布不透明正方形，由系统决定显示裁切形状。
-
-以下是项目运行素材的离线渲染预览，不是实机战斗截图：
-
-<img src="docs/media/spider-preview.png" width="420" alt="蜘蛛模型素材预览" />
-<img src="docs/media/web-tool-preview.png" width="420" alt="蛛丝工具素材预览" />
+<img src="docs/media/spider-preview.png" width="420" alt="Tripo跳蛛素材预览" />
+<img src="docs/media/web-tool-preview.png" width="420" alt="新版蛛丝护腕素材预览" />
 
 ## 构建
 
-需要 JDK 17 或更新版本、Android SDK Platform 35 / 对应构建工具，以及可访问 PICO Spatial SDK Maven 仓库的环境。项目提供 Gradle 8.13 Wrapper。运行环境需为兼容 PICO Spatial SDK 6.2 的头显，arm64-v8a，Android API 35 及以上。
+技术栈：Kotlin 2.1.20、Compose、PICO Spatial SDK BOM 6.2.8、Gradle Wrapper 8.13。需要JDK17或更新版本、Android SDK Platform35及对应构建工具；运行目标为兼容Spatial SDK6.2的PICO头显，arm64-v8a、Android API35及以上。
 
-官方环境指南：[PICO CLI 安装与初始化](https://lf3-static.bytednsdoc.com/obj/eden-cn/bvonuhmlkbps/other/pico-cli-installation-guide.md)。按官方流程配置后，在 Android Studio 中打开本仓库，或运行：
+官方环境指南：[PICO CLI 安装与初始化](https://lf3-static.bytednsdoc.com/obj/eden-cn/bvonuhmlkbps/other/pico-cli-installation-guide.md)。配置后执行：
 
 ```sh
 ./gradlew testDebugUnitTest assembleDebug
 ```
 
-APK 位于 `app/build/outputs/apk/debug/app-debug.apk`。在自己的环境中配置 `ANDROID_HOME`，或创建未被版本控制跟踪的 `local.properties`。不要提交签名密钥或本机 SDK 路径。
-
-官方 PICO CLI 安装与启动示例：
+APK位于 `app/build/outputs/apk/debug/app-debug.apk`。配置自己的 `ANDROID_HOME` 或本地 `local.properties`。运行所需素材已包含在项目中，构建不需要Tripo授权或素材服务调用；不要提交签名密钥、凭证或本机SDK路径。
 
 ```sh
 pico-cli device list --format json
@@ -68,16 +58,17 @@ pico-cli app launch com.example.swarmhunter --device <device-id>
 
 | 路径 | 用途 |
 | --- | --- |
-| `app/src/main/java/com/example/swarmhunter/game/HuntRuntime.kt` | 设备追踪、场景、工具、音效与战斗集成 |
-| `app/src/main/java/com/example/swarmhunter/game/HuntEngine.kt` | 游戏状态、手势记忆与纯逻辑 |
-| `app/src/main/java/com/example/swarmhunter/game/HandAttachmentTracker.kt` | 工具跟随防抖 |
-| `app/src/main/java/com/example/swarmhunter/game/PanelFollower.kt` | 前方水平朝向面板 |
-| `app/src/main/java/com/example/swarmhunter/content/HomeStage.kt` | 自定义 Compose UI |
-| `app/src/main/assets` | 应用使用的模型、UI与音频 |
-| `app/src/test` | 本地逻辑回归测试 |
+| `app/src/main/java/com/example/swarmhunter/game/HuntRuntime.kt` | 追踪、场景、工具、音效与战斗集成 |
+| `app/src/main/java/com/example/swarmhunter/game/HuntEngine.kt` | 游戏状态与手势记忆 |
+| `app/src/main/java/com/example/swarmhunter/game/EncounterPresentation.kt` | 出场、尺寸、音频节奏及死亡阶段 |
+| `app/src/main/java/com/example/swarmhunter/game/GazePlacement.kt` | 视野中心机关选择与平面朝向 |
+| `app/src/main/java/com/example/swarmhunter/game/HandAttachmentTracker.kt` | 稳定护腕跟随 |
+| `app/src/main/java/com/example/swarmhunter/content/HomeStage.kt` | 自定义Compose界面 |
+| `app/src/main/assets` | 运行模型、UI与音频 |
+| `app/src/test` | 逻辑回归测试 |
 
 ## 当前状态
 
-37项核心测试通过。真机既有日志确认激光和蛛丝命中计数；最新版本安装、启动、原生平面朝向与连续碰撞检查通过。当前发布为**开发体验版**，端到端响应时间、感知声源定位精度、长期性能，以及最新面板/墙面视觉体验仍需专项验收；不把这些指标写成已达标承诺。
+108项单元测试、debug构建及原生启动检查通过。当前是**开发体验版**：实际门户可见性、复杂房间贴面/转角、手势与机关手感、音画同步和声音辨识、端到端发射延迟、声源定位精度及持续性能仍需实机专项验收。
 
-第三方依赖和素材说明见 [THIRD_PARTY_NOTICES.md](docs/THIRD_PARTY_NOTICES.md)。本仓库公开源码，尚未指定项目整体的开源许可证。
+依赖和素材说明见 [THIRD_PARTY_NOTICES.md](docs/THIRD_PARTY_NOTICES.md)。公开源码尚未指定项目整体开源许可证。

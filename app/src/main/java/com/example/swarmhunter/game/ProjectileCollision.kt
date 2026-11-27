@@ -19,3 +19,6 @@ class RicochetState(var direction:V3,var speed:Float=7f) {
  }
  val expired get()=age>=1.4f||travelled>=10f
 }
+
+/** The clear muzzle segment is part of the travel budget measured from the wrist. */
+fun launchedMotion(direction:V3,speed:Float,muzzleDistance:Float=.17f)=RicochetState(direction,speed).also{it.advance(0f,muzzleDistance.coerceAtLeast(0f))}

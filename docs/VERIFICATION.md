@@ -1,20 +1,23 @@
-# Verification - 1.1.0
+# Verification — 1.3.2 (versionCode 20)
 
-This debug candidate is not a claim of completed physical-room gameplay or performance acceptance.
+This debug build is a development preview, not completed physical-room gameplay or performance acceptance.
 
 | Area | Evidence |
 | --- | --- |
-| Unit tests | 55 passed, 0 failures, 0 errors (includes template arithmetic test) |
-| Build | testDebugUnitTest assembleDebug passed |
-| Experimental API consistency | Source/manifest checker passed |
-| Packaged assets | 32 GLB, 180 SFX WAV, 36 bilingual voice WAV; 12 upgraded GLB hashes match approved media |
-| Launcher icon | Existing full-square custom icon retained and packaged |
-| Runtime startup | Candidate installed/launched on hardware and compatible 6.2.1 emulator |
-| Imported animations | Native check of 9 model clip sets, duration and playback speed passed |
-| Native probes | Audio reuse, portal/surface orientation, projectile movement and swept collision passed |
+| Unit tests | 108 passed, 0 failures/errors |
+| Build | assembleDebug and testDebugUnitTest passed |
+| Experimental API consistency | Source/manifest checker passed; no new experimental opt-ins |
+| Packaged resources | 67 model/metadata/thumbnail files match local approved bytes, including32 GLB |
+| Creature assets | 8Tripo-source rigged creatures; 8moving one-second fall clips verified |
+| Arrival audio | 16distinct dry-mono48kHz arrival PCM recordings; 8per-species rhythm rates |
+| Runtime startup | Final candidate installed/launched on hardware and compatible6.2.1 emulator |
+| Native animation imports | 17model clip sets, including creature attack/fall durations and tool fire clips |
+| Native probes | Audio reuse/playback-rate command, floor/ceiling/wall orientation, projectile movement and swept collision passed |
 
-New regression coverage includes complete attack recovery/contact timing, stride mapping, nearest surface/enemy collision, wall-only bounded ricochets, short-beam endpoints, release-gated/limited/non-overlapping traps, full-segment wall occlusion, stale anchor rejection and temporary tracking grace. Debug probes do not simulate player input or award points.
+Regression coverage includes registration completion/current-pose firing, rotation/scale-invariant hand features, stopping on mismatch/tracking loss, all four tool cadences, gaze-plane selection, release-gated traps, finite surface bounds, arrival visibility gating, proportional nest sizing, density progression, death staging, and continuous oblique ceiling-to-wall turn entry.
 
-Pending human acceptance: PBR/alpha appearance, foot contact and attack transitions, physical ricochets, tabletop/wall placement and trap triggering, tracking comfort, voice quality, sustained frame rate and end-to-end gameplay. Measured firing latency and perceived spatial-audio angular accuracy remain unverified. Earlier 1.0.12 laser/web combat results do not establish acceptance of these revised features.
+The ceiling feature requires a real ceiling plane in the room scan. Placement uses HMD view-centre gaze, not eye tracking. Debug probes verify native APIs and transforms without simulating reactive gameplay or awarding points.
 
-No raw device logs, serial numbers, local filesystem paths, headset passthrough captures, internal execution ledgers or submission materials are included in the public repository.
+Human acceptance remains pending for actual portal visibility, physical AV timing, species sound recognition, death appearance, room-surface foot contact/corners, ricochets, traps, hand tracking comfort, voice quality, sustained frame rate and complete gameplay. Firing latency and perceived spatial-audio angular accuracy have not been certified.
+
+Raw device logs, serial numbers, local filesystem paths, headset passthrough captures, internal execution ledgers and submission materials are excluded from this public release.

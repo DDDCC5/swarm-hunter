@@ -37,7 +37,35 @@ private val Ink=Color(0xFF2C1E15);private val Ivory=Color(0xFFF2E8D8);private va
 @Composable private fun Label(text:String,size:Int=22,color:Color=Ink,bold:Boolean=false,modifier:Modifier=Modifier){BasicText(text,modifier,style=TextStyle(color=color,fontSize=size.sp,fontWeight=if(bold)FontWeight.Bold else FontWeight.Normal,textAlign=TextAlign.Center))}
 @Composable private fun Art(file:String,modifier:Modifier=Modifier){val context=LocalContext.current;val bitmap=remember(file){context.assets.open("ui/$file.png").use{BitmapFactory.decodeStream(it).asImageBitmap()}};Image(bitmap,null,modifier,contentScale=ContentScale.FillBounds)}
 @Composable private fun Action(text:String,enabled:Boolean=true,onClick:()->Unit){Box(Modifier.width(310.dp).height(72.dp).semantics{role=Role.Button}.clickable(enabled=enabled,onClick=onClick),contentAlignment=Alignment.Center){Art(if(enabled)"button_primary_normal"else"button_primary_disabled",Modifier.fillMaxSize());Label(text,22,if(enabled)Ivory else Muted,true)}}
-@Composable private fun Panel(title:String,subtitle:String,content:@Composable ColumnScope.()->Unit){Box(Modifier.fillMaxSize(),contentAlignment=Alignment.Center){Art("gesture_panel",Modifier.fillMaxSize());Column(Modifier.padding(44.dp).fillMaxSize(),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(22.dp,Alignment.CenterVertically)){Label(title,36,bold=true);Label(subtitle,21,Muted);content()}}}
+@Composable private fun Panel(title:String,subtitle:String,compact:Boolean=false,content:@Composable ColumnScope.()->Unit){Box(Modifier.fillMaxSize(),contentAlignment=Alignment.Center){Art("gesture_panel",Modifier.fillMaxSize());Column(Modifier.padding(if(compact)32.dp else 44.dp).fillMaxSize(),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(if(compact)14.dp else 22.dp,Alignment.CenterVertically)){Label(title,if(compact)32 else 36,bold=true);Label(subtitle,if(compact)19 else 21,Muted);content()}}}
+
+@Composable private fun DifficultyChoices(value:HuntDifficulty,onChange:(HuntDifficulty)->Unit){
+    Column(horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(6.dp)){
+        Label(words("任务难度","Mission difficulty"),18,Muted)
+        Row(horizontalArrangement=Arrangement.spacedBy(14.dp)){
+            for(level in HuntDifficulty.entries){val chosen=level==value
+                Box(Modifier.width(190.dp).height(50.dp).background(if(chosen)Copper else Ivory,RoundedCornerShape(12.dp)).border(1.dp,if(chosen)Copper else Muted,RoundedCornerShape(12.dp)).semantics{role=Role.RadioButton;selected=chosen}.clickable{onChange(level)},contentAlignment=Alignment.Center){
+                    Label(when(level){HuntDifficulty.RELAXED->words("轻松","Relaxed");HuntDifficulty.STANDARD->words("标准","Standard");HuntDifficulty.CHALLENGE->words("挑战","Challenge")},21,bold=chosen)
+                }
+            }
+        }
+    }
+}
+@Composable private fun PauseNotice(s:HuntSnapshot,retry:()->Unit,lightPanel:Boolean=false){
+    val alert=if(lightPanel)Ink else Copper;val body=if(lightPanel)Ink else Ivory
+    val notice=if(lightPanel)Modifier else Modifier.background(Brown.copy(alpha=.9f),RoundedCornerShape(12.dp)).padding(10.dp)
+    when(s.pauseReason){
+        CombatPause.SPACE->{Label(words("任务暂停：请环视扫描墙面与地面。","Paused: look around to scan walls and floors."),22,alert,modifier=notice);Action(words("检查空间权限","Check spatial permission")){retry()}}
+        CombatPause.HANDS->Label(words("手部追踪暂停，请将手放回视野。","Hand tracking paused. Bring a hand back into view."),22,alert,modifier=notice)
+        CombatPause.BACKGROUND->Label(words("任务已暂停","Mission paused"),22,alert,modifier=notice)
+        CombatPause.CONTROLLER->Label(words("请放下手柄，使用双手手势。","Put down the controllers and use your hands."),22,alert,modifier=notice)
+        CombatPause.NONE->when(s.handMask){
+            1->Label(words("左手可用，右手暂时不可见。","Left hand available. Right hand out of view."),18,body,modifier=notice)
+            2->Label(words("右手可用，左手暂时不可见。","Right hand available. Left hand out of view."),18,body,modifier=notice)
+            0->Label(words("手部暂时不可见，已停止发射。","Hands out of view. Firing stopped."),18,alert,modifier=notice)
+        }
+    }
+}
 
 @Composable fun HomeStage(){
     val context=LocalContext.current;val scope=rememberCoroutineScope();val runtime=remember{HuntRuntime(context,scope)};val s=runtime.state;val lifecycle=LocalLifecycleOwner.current;val size=panelSize(1000.dp,660.dp)
@@ -45,7 +73,7 @@ private val Ink=Color(0xFF2C1E15);private val Ivory=Color(0xFFF2E8D8);private va
     LaunchedEffect(runtime){runtime.hands.dataFlow.collect{runtime.receiveHands(it)}}
     SpatialView(Modifier.fillMaxSize(),attachments={
         AttachmentPanel("hunt_panel",size=size){
-            Box(Modifier.fillMaxSize()){
+            Box(if(s.hurt&&s.phase==HuntPhase.RUNNING)Modifier.fillMaxSize().border(4.dp,Copper,RoundedCornerShape(24.dp))else Modifier.fillMaxSize()){
                 when {
                     s.error!=null->Panel(words("加载遇到问题","Loading failed"),s.error){Action(words("退出","Exit")){com.example.swarmhunter.platform.LaunchActivity.current.get()?.finish()}}
                     s.loading||s.phase==HuntPhase.LOGO->Column(Modifier.fillMaxSize(),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.Center){Art("app_icon_512",Modifier.size(220.dp));Spacer(Modifier.height(24.dp));Label(words("虫潮猎手","Swarm Hunter"),48,Ivory,bold=true);Label(words("听声辨位 · 抬手出击","Listen. Locate. Strike."),22,Copper);if(s.loading)Label(words("正在准备猎具…","Preparing your gear…"),18,Muted)}
@@ -63,31 +91,39 @@ private val Ink=Color(0xFF2C1E15);private val Ivory=Color(0xFFF2E8D8);private va
                         if(!s.tracking&&!s.handPermission)Action(words("检查权限","Check permissions")){runtime.retryPermissions()}
                     }
                     s.phase==HuntPhase.TOOLS->Panel(words("选好工具，准备出猎","Choose your gear"),words("左右挥手切换，也可用手势点击卡片。","Swipe left or right, or tap a card with your hand.")){
-                        Row(horizontalArrangement=Arrangement.spacedBy(14.dp)){for(i in 0..3){val names=listOf(words("蛛丝","Web"),words("激光","Laser"),words("能量弹","Energy"),words("脉冲","Pulse"));Column(Modifier.width(195.dp).border(if(i==s.selected)3.dp else 1.dp,if(i==s.selected)Copper else Muted,RoundedCornerShape(20.dp)).clickable{runtime.chooseTool(i)}.padding(10.dp),horizontalAlignment=Alignment.CenterHorizontally){Art(listOf("thumb_wp01_web","thumb_wp02_laser","thumb_wp03_energy","thumb_wp04_pulse")[i],Modifier.size(165.dp));Label(names[i],23)}}}
+                        Row(horizontalArrangement=Arrangement.spacedBy(14.dp)){for(i in 0..3){val names=listOf(words("蛛丝","Web"),words("激光","Laser"),words("能量弹","Energy"),words("脉冲","Pulse"));Column(Modifier.width(195.dp).border(if(i==s.selected)3.dp else 1.dp,if(i==s.selected)Copper else Muted,RoundedCornerShape(20.dp)).clickable{runtime.chooseTool(i)}.padding(10.dp),horizontalAlignment=Alignment.CenterHorizontally){Art(listOf("thumb_wp01_web","thumb_wp02_laser","thumb_wp03_energy","thumb_wp04_pulse")[i],Modifier.size(165.dp));Label(names[i],23);Label(listOf(words("减速控制","Slow targets"),words("瞬时直射","Instant ray"),words("墙面反弹","Wall ricochet"),words("近距范围","Close blast"))[i],16,Muted)}}}
+                        Label(words("保持注册手势连发，松开即停。间隔：${toolFireInterval(s.selected)} 秒 / 发","Hold your saved pose to fire; relax to stop. Interval: ${toolFireInterval(s.selected)} s / shot"),20,Muted)
                         Row(horizontalArrangement=Arrangement.spacedBy(20.dp)){
                             Action(words("重新注册手势","Re-register pose")){runtime.reregisterGesture()}
                             Action(words("装备这组工具","Equip this pair")){runtime.confirmTools()}
                         }
                     }
-                    s.phase==HuntPhase.PICKUP->Panel(words("把双手放上去","Place your hands into the tools"),words("任意手型，手掌靠近对应工具即可自动装备。","Any hand shape works. Move each palm close to its tool to equip.")){
+                    s.phase==HuntPhase.PICKUP->Panel(words("把双手放上去","Place your hands into the tools"),words("任意手型，手掌靠近对应工具即可自动装备。","Any hand shape works. Move each palm close to its tool to equip."),compact=true){
                         Row(horizontalArrangement=Arrangement.spacedBy(70.dp)){Label(if(s.equippedLeft)words("左手已就绪","Left ready")else words("等待左手","Waiting for left hand"),26,if(s.equippedLeft)Copper else Muted);Label(if(s.equippedRight)words("右手已就绪","Right ready")else words("等待右手","Waiting for right hand"),26,if(s.equippedRight)Copper else Muted)}
-                        Label(words("无需做发射动作。装备后工具跟手，开始任务后才可发射。","No firing pose needed. Tools follow your hands once equipped; fire after starting."),22)
+                        Label(words("装备后工具跟手，保持注册手势连发，松开即停。","Tools follow your hands. Hold your saved pose to fire; relax to stop."),20)
+                        DifficultyChoices(s.difficulty,runtime::chooseDifficulty)
                         Row(horizontalArrangement=Arrangement.spacedBy(20.dp)){
                             Action(words("布置机关","Place traps"),s.equippedLeft&&s.equippedRight){runtime.prepareTraps()}
                             Action(words("直接开始任务","Start without traps"),s.equippedLeft&&s.equippedRight){runtime.start()}
                         }
+                        Action(if(s.practiceSuggested)words("先练习射击（推荐）","Practice first (recommended)")else words("练习射击","Practice shooting"),s.equippedLeft&&s.equippedRight){runtime.practice()}
                     }
                     s.phase==HuntPhase.PLACEMENT->Box(Modifier.fillMaxSize(),contentAlignment=Alignment.Center){
                         Art("placement_panel",Modifier.fillMaxSize())
                         Column(Modifier.padding(44.dp).fillMaxSize(),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(22.dp,Alignment.CenterVertically)){
                             Label(words("布置脉冲机关","Place pulse traps"),36,bold=true)
-                            Label(words(if(s.placementHand==1)"右手对准已扫描表面，松开后捏合确认。"else"左手对准已扫描表面，松开后捏合确认。",if(s.placementHand==1)"Aim your right hand at a scanned surface. Release, then pinch."else"Aim your left hand at a scanned surface. Release, then pinch."),21,Muted)
+                            Label(words("看向已扫描的墙面、地面或桌面，任一手双指捏合确认。","Look at a scanned wall, floor or table, then pinch with either hand."),21,Muted)
                             Row(horizontalArrangement=Arrangement.spacedBy(28.dp),verticalAlignment=Alignment.CenterVertically){
                                 Art("trap_thumbnail",Modifier.size(170.dp))
                                 Column(horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(16.dp)){
                                     Label(words("剩余机关 ${2-s.trapsPlaced} / 2","Traps remaining ${2-s.trapsPlaced} / 2"),26,bold=true)
-                                    Label(if(s.trapsPlaced>=2)words("机关都放好了，准备战斗！","All traps placed. Ready to hunt!")else if(s.placementValid)words("此处可放置","Ready to place")else words("寻找完整表面，避开边缘。","Find a clear surface, away from edges."),23,Copper,true)
-                                    Label(words("邻近触发 · 球形能量范围","Proximity trigger · Spherical pulse"),21,Muted)
+                                    Label(if(s.trapsPlaced>=2)words("机关都放好了，准备战斗！","All traps placed. Ready to hunt!")else if(s.placementValid)words("此处可放置","Ready to place")else when(s.placementHint){
+                                        PlacementHint.TRACKING->words("请让放置手进入追踪范围。","Keep your placement hand in view.")
+                                        PlacementHint.PANEL->words("请看向面板外的墙面、桌面或地面。","Look beside this panel at a wall, table or floor.")
+                                        PlacementHint.EDGE->words("看向表面中心，避开边缘和已有机关。","Look nearer the surface centre, clear of traps.")
+                                        else->words("视野中心对准已扫描表面，再松开、捏合。","Centre your view on a scanned surface, release, then pinch.")
+                                    },23,Copper,true)
+                                    Label(words("墙面竖放 · 地面桌面平放","Vertical on walls · Flat on floors and tables"),21,Muted)
                                 }
                             }
                             Label(words("布置是可选的，也可直接开始任务。","Placement is optional. You can start now."),21,Muted)
@@ -97,17 +133,27 @@ private val Ink=Color(0xFF2C1E15);private val Ivory=Color(0xFFF2E8D8);private va
                             }
                         }
                     }
+                    s.phase==HuntPhase.PRACTICE->Panel(words(if(s.practiceHits>=3)"练习完成，准备出猎"else"无伤射击练习",if(s.practiceHits>=3)"Practice complete"else"Safe shooting practice"),words("保持注册手势连发，击中前方缓慢目标。","Hold your saved pose and hit the slow target ahead."),compact=true){
+                        Label("${s.practiceHits.coerceAtMost(3)} / 3",64,Copper,true)
+                        Label(words("练习不扣生命，也不计入正式任务成绩。","Practice cannot cost lives or affect your mission score."),21,Muted)
+                        PauseNotice(s,runtime::retryPermissions,lightPanel=true)
+                        if(s.hitFlash)Label(words("命中！","Hit!"),28,Copper,true)
+                        Label(words("若未出现目标，请扫描前方可活动的地面。","If no target appears, scan a clear floor area ahead."),19,Muted)
+                        Action(if(s.practiceHits>=3)words("完成并返回准备","Finish and return")else words("跳过练习，返回准备","Skip and return")){runtime.finishPractice()}
+                    }
                     s.phase==HuntPhase.RUNNING->Column(Modifier.fillMaxWidth().padding(14.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(14.dp)){
                         Row(Modifier.background(Brown.copy(alpha=.90f),RoundedCornerShape(22.dp)).padding(20.dp),horizontalArrangement=Arrangement.spacedBy(32.dp),verticalAlignment=Alignment.CenterVertically){Row{for(i in 0..2)Art(if(i<s.lives)"life_full"else"life_empty",Modifier.size(42.dp))};Label(words("消灭 ${s.kills}","Eliminated ${s.kills}"),24,Ivory,bold=true);Label(words("存活 ","Survival ")+"%02d:%02d".format(s.seconds/60,s.seconds%60),24,Ivory,bold=true)}
-                        if(!s.tracking)Label(words("双手回到视野，稳住再来。任务已暂停。","Bring both hands into view. Mission paused."),22,Copper)
-                        else if(s.planes==0){Label(words("任务已暂停：请允许空间权限，并环视扫描墙面与地面。","Mission paused: allow spatial access, then scan walls and floors."),22,Copper);Action(words("检查空间权限","Check spatial permission")){runtime.retryPermissions()}}
-                        else if(s.seconds<8)Label(words("听声寻找目标；先换成不同手型，再做已记录的发射动作。","Locate the sound. Change your hand shape, then make your saved firing pose."),20,Ivory)
-                        if(s.tracking)Label(if(s.armedHands==0)words("先换成不同手型，再回到记录动作发射。","Change your hand shape, then return to your saved pose to fire.")else words("发射已就绪：对准目标，做记录动作。","Ready: aim and make your saved pose."),20,Ivory,modifier=Modifier.background(Brown.copy(alpha=.9f),RoundedCornerShape(12.dp)).padding(10.dp))
+                        PauseNotice(s,runtime::retryPermissions)
+                        if(s.pauseReason==CombatPause.NONE&&s.seconds<8)Label(words("听声寻找目标，保持记录的手势即可连续发射。","Locate the sound. Hold your saved pose to keep firing."),20,Ivory)
+                        if(s.resting&&s.pauseReason==CombatPause.NONE)Label(words("新裂口暂缓出现，清理身边目标。","New rifts are taking a break. Clear nearby targets."),18,Ivory)
+                        if(s.hitFlash)Label(if(s.hitKilled)words("消灭","Eliminated")else words("命中","Hit"),24,Copper,true)
+                        if(s.tracking&&s.firingHands>0)Label(words("连发中 · ${if(s.firingHands==3)"双手"else if(s.firingHands==1)"左手"else"右手"}","Firing · ${if(s.firingHands==3)"Both hands"else if(s.firingHands==1)"Left hand"else"Right hand"}"),20,Copper,modifier=Modifier.background(Brown.copy(alpha=.9f),RoundedCornerShape(12.dp)).padding(10.dp))
                         if(s.hurt)Label(words("受伤！稳住，还能打。","Hit! Stay sharp. You're still in this."),28,Copper,true)
                     }
-                    s.phase==HuntPhase.RESULTS->Panel(words("任务结算","Mission complete"),words("调整呼吸，下一轮更准。","Take a breath. Make the next one count.")){
-                        Label(s.grade,100,Copper,true)
+                    s.phase==HuntPhase.RESULTS->Panel(words("任务结算","Mission complete"),words("调整呼吸，下一轮更准。","Take a breath. Make the next one count."),compact=true){
+                        Label(s.grade,64,Copper,true)
                         Row(horizontalArrangement=Arrangement.spacedBy(70.dp)){Column(horizontalAlignment=Alignment.CenterHorizontally){Label("${s.kills}",48,bold=true);Label(words("消灭数量","Eliminated"),22,Muted)};Column(horizontalAlignment=Alignment.CenterHorizontally){Label("%02d:%02d".format(s.seconds/60,s.seconds%60),48,bold=true);Label(words("存活时长","Survival time"),22,Muted)}}
+                        Label(words("射击命中率 ${s.accuracyPercent}% · 机关消灭 ${s.trapKills}","Shot accuracy ${s.accuracyPercent}% · Trap kills ${s.trapKills}"),20,Muted)
                         Action(words("再来一次","Hunt again")){runtime.retry()}
                     }
                 }

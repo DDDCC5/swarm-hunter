@@ -13,9 +13,9 @@ class HuntEngineTest {
         repeat(26){r.register(pose,pose,.1f)}
         assertTrue(r.registered)
     }
-    @Test fun customPoseRejectsUnknownShapeAndNeedsReleaseBetweenShots() {
+    @Test fun customPoseRejectsUnknownShapeAndRateLimitsHeldShots() {
         val r=GestureMemory();repeat(26){r.register(pose,pose,.1f)}
-        assertFalse(r.fire(0,pose,.02f))
+        assertTrue(r.fire(0,pose,.02f))
         repeat(10){r.fire(0,List(15){1.4f},.02f)}
         assertTrue(r.fire(0,pose,.02f))
         assertFalse(r.fire(0,pose,.02f))
@@ -60,7 +60,7 @@ class HuntEngineTest {
     @Test fun pauseDisarmsGestureWithoutDeletingTemplate() {
         val r=GestureMemory();repeat(26){r.register(pose,pose,.1f)}
         repeat(10){r.fire(0,List(15){1.4f},.02f)};r.suspendInput()
-        assertFalse(r.fire(0,pose,.02f));assertTrue(r.registered)
+        assertFalse(r.isMatching(0));assertTrue(r.fire(0,pose,.02f));assertTrue(r.registered)
     }
     @Test fun nearestEligibleHitFiltersDeadOrHiddenTargets() {
         val g=HuntEngine();g.start();val a=g.spawn(0,V3(0f,0f,-1f));val b=g.spawn(1,V3(0f,0f,-2f));g.reveal(b.id)
@@ -111,7 +111,7 @@ class HuntEngineTest {
     }
     @Test fun emergenceMovesWholeRootFromBehindToOutsidePortal() {
         val first=emergencePosition(0f,.30f);val last=emergencePosition(1f,.30f)
-        assertTrue(first.z<-.25f);assertTrue(last.z>0f)
+        assertTrue(first.z<-.25f);assertEquals(0f,last.z,.00001f)
         var old=first.z
         repeat(100){i->val p=emergencePosition((i+1)/100f,.30f);assertTrue(p.z>=old);old=p.z}
     }
@@ -166,11 +166,11 @@ class HuntEngineTest {
     @Test fun returningFromToolsForgetsOldPoseAndRecordsNewOne() {
         val engine=HuntEngine();val memory=GestureMemory();val oldPose=List(15){.4f};val newPose=List(15){1.1f}
         repeat(26){memory.register(oldPose,oldPose,.1f)}
-        repeat(10){memory.fire(0,newPose,.02f)};assertTrue(memory.isArmed(0))
+        assertTrue(memory.fire(0,oldPose,.02f));assertTrue(memory.isMatching(0))
         engine.phase=HuntPhase.TOOLS
         assertTrue(engine.returnToGesture(memory))
         assertEquals(HuntPhase.GESTURE,engine.phase);assertFalse(memory.registered);assertEquals(0f,memory.progress,0f)
-        assertFalse(memory.isArmed(0));assertFalse(memory.fire(0,oldPose,.02f))
+        assertFalse(memory.isMatching(0));assertFalse(memory.fire(0,oldPose,.02f))
         repeat(26){memory.register(newPose,newPose,.1f)};assertTrue(memory.registered)
         repeat(10){assertFalse(memory.fire(0,oldPose,.02f))}
         assertTrue(memory.fire(0,newPose,.02f))

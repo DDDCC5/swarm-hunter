@@ -1,16 +1,16 @@
 {
   "id": "sp01_jumping",
-  "name": "炭黑跳蛛",
+  "name": "写实跳蛛",
   "kind": "spider",
-  "revision": "quality-v2",
   "spanMeters": 0.12,
   "legCount": 8,
-  "bones": 25,
-  "triangles": 29120,
+  "originalTaskId": "76b58ac5-7f35-4d34-8ebe-7aac1e3e7c04",
+  "originalSha256": "9fb9a60a9bdf0902b88f260079f174f644ce2151983d357af79f221e9ee30d9b",
+  "textureSize": 1024,
   "motion": {
     "fps": 30,
     "strideMeters": 0.048,
-    "cycleSeconds": 1.0,
+    "cycleSeconds": 1,
     "stanceRatio": 0.64,
     "attackDurationSeconds": 1.2,
     "attackContactSeconds": 0.56,
@@ -20,8 +20,7 @@
     ],
     "rootTravelBaked": false,
     "worldUp": "+Y",
-    "worldForward": "-Z",
-    "rootTravelScope": "idle,crawl,turn_left,turn_right,attack,hit; emerge/emerge_floor/fall contain clip-local displacement"
+    "worldForward": "-Z"
   },
   "clips": [
     {
@@ -96,5 +95,9 @@
       ],
       "fps": 30
     }
-  ]
+  ],
+  "triangles": 18271,
+  "bones": 25,
+  "revision": "tripo-runtime-v1",
+  "source": "Tripo P2-20260801; locally rigged derivative"
 }

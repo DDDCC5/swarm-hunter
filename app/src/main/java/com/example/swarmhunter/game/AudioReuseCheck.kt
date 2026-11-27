@@ -13,6 +13,7 @@ internal fun verifyAudioReuse(root:Entity,samples:List<AudioResource>) {
             root.addChild(emitter)
             emitter.components.set(ObjectAudioComponent(volume=0f,reverbVolume=0f))
             val player=emitter.playAudio(resource)
+            check(player.setPlaybackSpeed(.72f)){"Native audio playback-rate command rejected"}
             player.stop()
             player.close()
             emitter.destroy()

@@ -1,17 +1,44 @@
 {
   "id": "wp03_energy",
-  "name": "能量弹",
-  "kind": "tool",
-  "dimensionsUnit": "meter",
-  "sideFiles": [
-    "wp03_energy_right.glb",
-    "wp03_energy_left.glb"
-  ],
+  "name": "胶囊式能量护腕",
+  "revision": "asset-polish-v4",
+  "triangles": 4080,
   "clips": [
     "equip",
     "fire"
   ],
-  "mirroredLeftPending": false,
-  "triangles": 5828,
-  "leftMethod": "Exact left/right mirror under a new glTF root; skeleton and clips preserved"
+  "muzzleLocalBlender": [
+    0,
+    0.086,
+    0.036
+  ],
+  "muzzleLocalGame": [
+    0,
+    0.036,
+    -0.086
+  ],
+  "mountOrigin": "wrist centre; cuff centred at zero, not shifted to emitter axis",
+  "aperture": {
+    "diameterMeters": 0.012,
+    "depthMeters": 0.012
+  },
+  "leftMethod": "baked geometry mirror with reversed winding",
+  "animationPolicy": "fixed exterior; captive internal slider axial travel <=0.6mm; wrist root stationary",
+  "functionPalette": {
+    "shell": [
+      0.015,
+      0.23,
+      0.32
+    ],
+    "trim": [
+      0.06,
+      0.43,
+      0.49
+    ],
+    "signal": [
+      0.08,
+      0.8,
+      1
+    ]
+  }
 }

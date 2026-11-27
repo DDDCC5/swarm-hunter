@@ -2,15 +2,20 @@
   "id": "sp03_orb",
   "name": "橄榄园蛛",
   "kind": "spider",
-  "revision": "quality-v2",
   "spanMeters": 0.18,
   "legCount": 8,
-  "bones": 25,
-  "triangles": 23525,
+  "originalTaskId": "f1754841-7e8a-4d54-be5d-bb77532946d6",
+  "originalSha256": "ad51f7c204f8d022c903a0edaa03e1acf9b56d8860a7243663e01995fcd9571b",
+  "textureSize": 1024,
+  "cleanupRemovedVertices": 0,
+  "looseVerticesRemoved": 597,
+  "gaitMethod": "Preserved source knee pose and conservative length-preserving limb swings",
+  "verticalScale": 1,
+  "cleanupReason": null,
   "motion": {
     "fps": 30,
     "strideMeters": 0.072,
-    "cycleSeconds": 1.0,
+    "cycleSeconds": 1,
     "stanceRatio": 0.64,
     "attackDurationSeconds": 1.2,
     "attackContactSeconds": 0.56,
@@ -20,8 +25,7 @@
     ],
     "rootTravelBaked": false,
     "worldUp": "+Y",
-    "worldForward": "-Z",
-    "rootTravelScope": "idle,crawl,turn_left,turn_right,attack,hit; emerge/emerge_floor/fall contain clip-local displacement"
+    "worldForward": "-Z"
   },
   "clips": [
     {
@@ -96,5 +100,9 @@
       ],
       "fps": 30
     }
-  ]
+  ],
+  "triangles": 17407,
+  "bones": 25,
+  "revision": "all-species-v2",
+  "source": "Tripo P2-20260801; locally rigged derivative"
 }

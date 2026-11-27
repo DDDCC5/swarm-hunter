@@ -2,7 +2,7 @@ package com.example.swarmhunter.game
 
 import kotlin.math.*
 
-enum class RoomSurfaceKind { FLOOR, WALL, TABLE }
+enum class RoomSurfaceKind { FLOOR, WALL, TABLE, CEILING }
 data class RoomSurface(val id:String,val kind:RoomSurfaceKind,val origin:V3,val rotation:Q4,val vertices:List<V3>,val indices:List<Int>) {
     fun world(p:V3)=origin+rotation.rotate(p)
     fun local(p:V3)=Q4(-rotation.x,-rotation.y,-rotation.z,rotation.w).rotate(p-origin)
@@ -21,7 +21,7 @@ class RoomSurfaceRegistry {
     }
     fun cast(origin:V3,direction:V3,maxDistance:Float,wallsOnly:Boolean=false):SurfaceHit? = castInternal(origin,direction,maxDistance,wallsOnly,null)
     private fun castInternal(origin:V3,direction:V3,maxDistance:Float,wallsOnly:Boolean,surfaceId:String?):SurfaceHit? {
-        if(!available||maxDistance<=0f||!maxDistance.isFinite()||direction.length()<.00001f)return null
+        if(!available||maxDistance<=0f||!maxDistance.isFinite()||!listOf(origin.x,origin.y,origin.z,direction.x,direction.y,direction.z).all(Float::isFinite)||direction.length()<.00001f)return null
         val d=direction.normalized();var closest:SurfaceHit?=null
         for(s in surfaces.values){
             if((surfaceId!=null&&s.id!=surfaceId)||(wallsOnly&&s.kind!=RoomSurfaceKind.WALL))continue
@@ -40,7 +40,7 @@ class RoomSurfaceRegistry {
         };return closest
     }
     fun canPlace(hit:SurfaceHit,radius:Float=.10f):Boolean {
-        if(surfaces[hit.surface.id]!=hit.surface)return false
+        if(surfaces[hit.surface.id]!=hit.surface||!listOf(hit.point.x,hit.point.y,hit.point.z,hit.normal.x,hit.normal.y,hit.normal.z).all(Float::isFinite)||hit.normal.length()<.001f)return false
         val n=hit.normal;val tangent=n.cross(if(abs(n.y)<.9f)V3(0f,1f,0f)else V3(1f,0f,0f)).normalized();val bitangent=n.cross(tangent)
         // The device footprint must fit the triangle union, including concave boundaries.
         return (0..8).all{i->val a=i*PI.toFloat()/4;val p=hit.point+if(i==8)V3(0f,0f,0f)else(tangent*cos(a)+bitangent*sin(a))*radius

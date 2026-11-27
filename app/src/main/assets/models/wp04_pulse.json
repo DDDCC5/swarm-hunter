@@ -1,17 +1,44 @@
 {
   "id": "wp04_pulse",
-  "name": "脉冲器",
-  "kind": "tool",
-  "dimensionsUnit": "meter",
-  "sideFiles": [
-    "wp04_pulse_right.glb",
-    "wp04_pulse_left.glb"
-  ],
+  "name": "浅盘式脉冲护腕",
+  "revision": "asset-polish-v4",
+  "triangles": 4564,
   "clips": [
     "equip",
     "fire"
   ],
-  "mirroredLeftPending": false,
-  "triangles": 9928,
-  "leftMethod": "Exact left/right mirror under a new glTF root; skeleton and clips preserved"
+  "muzzleLocalBlender": [
+    0,
+    0.0895,
+    0.034
+  ],
+  "muzzleLocalGame": [
+    0,
+    0.034,
+    -0.0895
+  ],
+  "mountOrigin": "wrist centre; cuff centred at zero, not shifted to emitter axis",
+  "aperture": {
+    "slotWidthMeters": 0.0015,
+    "slots": 3
+  },
+  "leftMethod": "baked geometry mirror with reversed winding",
+  "animationPolicy": "fixed exterior; captive internal slider axial travel <=0.6mm; wrist root stationary",
+  "functionPalette": {
+    "shell": [
+      0.2,
+      0.055,
+      0.34
+    ],
+    "trim": [
+      0.39,
+      0.18,
+      0.52
+    ],
+    "signal": [
+      0.65,
+      0.18,
+      1
+    ]
+  }
 }

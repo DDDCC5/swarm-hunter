@@ -6,9 +6,9 @@ import kotlin.math.PI
 
 /** Debug-only portal hierarchy check for floor and wall orientation; no user input or visuals. */
 internal fun verifySurfaceAlignment(root:Entity):String {
-    val cases=listOf("floor" to V3(0f,1f,0f),"wall_x" to V3(1f,0f,0f),"wall_z" to V3(0f,0f,1f))
+    val cases=listOf("floor" to V3(0f,1f,0f),"ceiling" to V3(0f,-1f,0f),"wall_x" to V3(1f,0f,0f),"wall_z" to V3(0f,0f,1f))
     for((name,normal)in cases){
-        val forward=if(name=="floor")V3(0f,0f,-1f)else V3(0f,-1f,0f)
+        val forward=if(name=="floor"||name=="ceiling")V3(0f,0f,-1f)else V3(0f,-1f,0f)
         val model=surfaceRotation(normal,forward);val frameRotation=model*Q4.axisAngle(V3(1f,0f,0f),-PI.toFloat()/2f)
         val frame=Entity();root.addChild(frame)
         frame.components[TransformComponent::class.java]!!.quaternion=Quat(frameRotation.x,frameRotation.y,frameRotation.z,frameRotation.w)
@@ -26,5 +26,5 @@ internal fun verifySurfaceAlignment(root:Entity):String {
             }finally{if(body.valid)body.destroy()}
         }finally{if(frame.valid)frame.destroy()}
     }
-    return "floor, wall_x, wall_z before/after portal emergence"
+    return "floor, ceiling, wall_x, wall_z before/after portal emergence"
 }

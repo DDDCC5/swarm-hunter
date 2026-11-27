@@ -1,0 +1,62 @@
+[
+  {
+    "id": "sp01_jumping",
+    "sha256": "eac7e85aec10c2546e4125738c54784050b5604c566672e713365e5e642f5a28",
+    "sourceTaskId": "76b58ac5-7f35-4d34-8ebe-7aac1e3e7c04",
+    "sourceSha256": "9fb9a60a9bdf0902b88f260079f174f644ce2151983d357af79f221e9ee30d9b",
+    "triangles": 18271
+  },
+  {
+    "id": "sp02_wolf",
+    "sha256": "b93548645e90a692e7a64c11bdc2d363c640b9026870b46c8d6b2b19ad3c279e",
+    "sourceTaskId": "97b5330f-461b-4cd9-8db1-b7ec334feca6",
+    "sourceSha256": "42212b02247cd9cf6eef9088113489db3c27abcc5366a341333651cb60902326",
+    "triangles": 14894
+  },
+  {
+    "id": "sp03_orb",
+    "sha256": "3cdeafe189b6821d1312802b2d13c2c745495efb183bf9ec24fac2b4eb998e79",
+    "sourceTaskId": "f1754841-7e8a-4d54-be5d-bb77532946d6",
+    "sourceSha256": "ad51f7c204f8d022c903a0edaa03e1acf9b56d8860a7243663e01995fcd9571b",
+    "triangles": 17407
+  },
+  {
+    "id": "sp04_tarantula",
+    "sha256": "2c0e7790b4619b55ef61189f29c1dce33c6075681641c15bf48931fa7f7d4510",
+    "sourceTaskId": "fe28fbf4-3bc8-494a-a80a-288cad9c0315",
+    "sourceSha256": "0422219cf8f6cfec84f2a9482a48c7bc8fe744ba1387ec623047d09a4a6de5fa",
+    "triangles": 15420
+  },
+  {
+    "id": "sp05_longlegs",
+    "sha256": "f3dcc9965b043925f32d8b0ce5d72472bda3390e3d00bf1c41c107496a1653dd",
+    "sourceTaskId": "065bb519-39ed-43e7-9a11-02670735db60",
+    "sourceSha256": "e4e9139660df355bbff2a438c5e42878f630d8ebfcd8220d52998a3ffabb6b1d",
+    "triangles": 14964
+  },
+  {
+    "id": "in01_roach",
+    "sha256": "aebbae291383813bc832519fa8cfab86b9d3cded4bffc7d3720adee5a3d72b2a",
+    "sourceTaskId": "ee5f9322-2e6d-4605-ab08-98c1a6efa83b",
+    "sourceSha256": "26f6650f16454aa59bd3d90fb9eb644fb82068c757ce1a6cecbf79140d069307",
+    "triangles": 10074
+  },
+  {
+    "id": "in02_beetle",
+    "sha256": "878ee3210c2bfb67ddc3de25c4e49335c89520f979f77bd80c3b8824239f18d6",
+    "sourceTaskId": "4ab9f3c1-13df-4ea0-b91c-3f5ea52b9aba",
+    "sourceSha256": "57185e480dc6fdc3688183ca5e6beb5a8742fb382c6c14912508bfcc90729629",
+    "triangles": 18146
+  },
+  {
+    "id": "in03_weevil",
+    "sha256": "3c45edebd4e79b5c8312f87c4d154382f05ebb4f8a51701a5ff9421fa306f270",
+    "sourceTaskId": "00bfc7cf-648a-4ac6-bd55-899d7668d249",
+    "sourceSha256": "a4f13ac42cdcfea64950ccde9411d76b9dd6ae57f0250cb4a214286cb05fca96",
+    "triangles": 12932
+  },
+  {
+    "toolsRevision": "asset-polish-v4",
+    "cloudCreditsConsumedThisIntegration": 0
+  }
+]

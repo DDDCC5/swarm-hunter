@@ -2,15 +2,21 @@
   "id": "sp05_longlegs",
   "name": "琥珀长足蛛",
   "kind": "spider",
-  "revision": "quality-v2",
   "spanMeters": 0.28,
   "legCount": 8,
-  "bones": 25,
-  "triangles": 22984,
+  "originalTaskId": "065bb519-39ed-43e7-9a11-02670735db60",
+  "originalSha256": "e4e9139660df355bbff2a438c5e42878f630d8ebfcd8220d52998a3ffabb6b1d",
+  "textureSize": 1024,
+  "cleanupRemovedVertices": 0,
+  "looseVerticesRemoved": 1256,
+  "repairedDetachedLegSegments": 1,
+  "gaitMethod": "Preserved source knee pose and conservative length-preserving limb swings",
+  "verticalScale": 1,
+  "cleanupReason": null,
   "motion": {
     "fps": 30,
-    "strideMeters": 0.112,
-    "cycleSeconds": 1.0,
+    "strideMeters": 0.11200000000000002,
+    "cycleSeconds": 1,
     "stanceRatio": 0.64,
     "attackDurationSeconds": 1.2,
     "attackContactSeconds": 0.56,
@@ -20,8 +26,7 @@
     ],
     "rootTravelBaked": false,
     "worldUp": "+Y",
-    "worldForward": "-Z",
-    "rootTravelScope": "idle,crawl,turn_left,turn_right,attack,hit; emerge/emerge_floor/fall contain clip-local displacement"
+    "worldForward": "-Z"
   },
   "clips": [
     {
@@ -96,5 +101,9 @@
       ],
       "fps": 30
     }
-  ]
+  ],
+  "triangles": 14964,
+  "bones": 25,
+  "revision": "all-species-v2",
+  "source": "Tripo P2-20260801; locally rigged derivative"
 }

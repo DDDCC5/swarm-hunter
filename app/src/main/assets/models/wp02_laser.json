@@ -1,17 +1,44 @@
 {
   "id": "wp02_laser",
-  "name": "激光束",
-  "kind": "tool",
-  "dimensionsUnit": "meter",
-  "sideFiles": [
-    "wp02_laser_right.glb",
-    "wp02_laser_left.glb"
-  ],
+  "name": "细轨式激光护腕",
+  "revision": "asset-polish-v4",
+  "triangles": 3428,
   "clips": [
     "equip",
     "fire"
   ],
-  "mirroredLeftPending": false,
-  "triangles": 10296,
-  "leftMethod": "Exact left/right mirror under a new glTF root; skeleton and clips preserved"
+  "muzzleLocalBlender": [
+    0,
+    0.114,
+    0.037
+  ],
+  "muzzleLocalGame": [
+    0,
+    0.037,
+    -0.114
+  ],
+  "mountOrigin": "wrist centre; cuff centred at zero, not shifted to emitter axis",
+  "aperture": {
+    "diameterMeters": 0.005,
+    "depthMeters": 0.018
+  },
+  "leftMethod": "baked geometry mirror with reversed winding",
+  "animationPolicy": "fixed exterior; captive internal slider axial travel <=0.6mm; wrist root stationary",
+  "functionPalette": {
+    "shell": [
+      0.31,
+      0.018,
+      0.025
+    ],
+    "trim": [
+      0.55,
+      0.12,
+      0.055
+    ],
+    "signal": [
+      1,
+      0.055,
+      0.025
+    ]
+  }
 }

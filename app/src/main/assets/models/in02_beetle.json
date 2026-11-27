@@ -1,16 +1,16 @@
 {
   "id": "in02_beetle",
-  "name": "蓝黑甲虫",
+  "name": "重甲甲虫",
   "kind": "beetle",
-  "revision": "quality-v2",
   "spanMeters": 0.14,
   "legCount": 6,
-  "bones": 19,
-  "triangles": 19104,
+  "originalTaskId": "4ab9f3c1-13df-4ea0-b91c-3f5ea52b9aba",
+  "originalSha256": "57185e480dc6fdc3688183ca5e6beb5a8742fb382c6c14912508bfcc90729629",
+  "textureSize": 1024,
   "motion": {
     "fps": 30,
-    "strideMeters": 0.0448,
-    "cycleSeconds": 1.0,
+    "strideMeters": 0.044800000000000006,
+    "cycleSeconds": 1,
     "stanceRatio": 0.64,
     "attackDurationSeconds": 1.2,
     "attackContactSeconds": 0.56,
@@ -20,8 +20,7 @@
     ],
     "rootTravelBaked": false,
     "worldUp": "+Y",
-    "worldForward": "-Z",
-    "rootTravelScope": "idle,crawl,turn_left,turn_right,attack,hit; emerge/emerge_floor/fall contain clip-local displacement"
+    "worldForward": "-Z"
   },
   "clips": [
     {
@@ -96,5 +95,9 @@
       ],
       "fps": 30
     }
-  ]
+  ],
+  "triangles": 18146,
+  "bones": 19,
+  "revision": "tripo-runtime-v1",
+  "source": "Tripo P2-20260801; locally rigged derivative"
 }

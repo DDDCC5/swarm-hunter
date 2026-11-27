@@ -17,7 +17,7 @@ class RoomSurfaceAdapter(private val root:Entity,val registry:RoomSurfaceRegistr
  fun surfaceFor(entity:Entity)=proxies.values.firstOrNull{it.entity==entity}?.snapshot
  fun update(anchors:Collection<PlaneAnchor>){
   val snapshots=anchors.mapNotNull{a->
-   val kind=when(a.semantics){SemanticLabelType.WALL->RoomSurfaceKind.WALL;SemanticLabelType.FLOOR->RoomSurfaceKind.FLOOR;SemanticLabelType.TABLE->RoomSurfaceKind.TABLE;else->return@mapNotNull null}
+   val kind=when(a.semantics){SemanticLabelType.WALL->RoomSurfaceKind.WALL;SemanticLabelType.FLOOR->RoomSurfaceKind.FLOOR;SemanticLabelType.TABLE->RoomSurfaceKind.TABLE;SemanticLabelType.CEILING->RoomSurfaceKind.CEILING;else->return@mapNotNull null}
    val p=root.convertPositionFrom(a.transform.position,null);val q=root.convertRotationFrom(a.transform.rotation.toQuat(),null)
    RoomSurface(a.anchorUUID.toString(),kind,V3(p.x,p.y,p.z),Q4(q.x,q.y,q.z,q.w),a.vertices.map{V3(it.x,it.y,it.z)},a.indices.toList())
   }
